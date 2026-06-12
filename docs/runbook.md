@@ -4,7 +4,34 @@
 ```bash
 cp .env.example .env          # already done if .env exists
 make demo-phase-0             # clean migrate + verify schema + worker /health
+make demo-phase-1             # research -> >=30 deduped scored topics (mock providers)
 ```
+
+## Phase 1 — research → scored topics
+Run the pipeline live (worker on :8008, mock providers by default in `.env`):
+```bash
+make up
+curl -X POST localhost:8008/jobs/research_sweep   # poll RSS/Reddit -> raw_signals
+curl -X POST localhost:8008/jobs/trend_scout      # cluster -> topics (needs LLM to classify)
+curl -X POST localhost:8008/jobs/topic_scorer     # score topics (needs LLM)
+```
+Dashboard Research Queue: `WORKER_URL=http://localhost:8008 pnpm --filter @pwg/dashboard dev`
+then open `/research` (greenlight/reject, factor breakdown, signal firehose).
+
+**Provider modes** (`.env`): keyless dev uses `USE_MOCK_PROVIDERS=true` + `EMBEDDINGS_BACKEND=mock`.
+Production: set `USE_MOCK_PROVIDERS=false`, `EMBEDDINGS_BACKEND=bge-m3`, and `ANTHROPIC_API_KEY`.
+With mock LLM, `trend_scout` still creates topics but `topic_scorer` needs a real key (the
+mock returns no factor scores) — use `make demo-phase-1` for the deterministic full-path proof.
+
+### Known limitation — Reddit sources 403
+Reddit blocks the generic bot User-Agent on `*/new.json` (returns 403); the 3 Reddit
+sources fail gracefully (logged as `warn` in `system_events`) while the 6 RSS sources work.
+Fix in a later pass: Reddit OAuth app credentials or a compliant UA + backoff.
+
+### Dashboard gotcha
+Do NOT inline `WORKER_URL` via `next.config.mjs` `env` — that bakes a build-time constant.
+Server components read `process.env.WORKER_URL` at runtime (`apps/dashboard/lib/worker.ts`).
+Postgres `numeric` serializes as a JSON string; the API casts score columns to `float8`.
 Individual targets:
 ```bash
 make up         # start db + worker

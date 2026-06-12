@@ -27,6 +27,14 @@ def get_pool() -> ConnectionPool:
     return _pool
 
 
+def close_pool() -> None:
+    """Close the pool explicitly (avoids noisy finalizer warnings in short-lived scripts)."""
+    global _pool
+    if _pool is not None:
+        _pool.close()
+        _pool = None
+
+
 @contextmanager
 def cursor() -> Iterator[Any]:
     """Yield a cursor inside a transaction; commit on success, rollback on error."""
@@ -41,3 +49,8 @@ def ping() -> bool:
         cur.execute("select 1 as ok")
         row = cur.fetchone()
         return bool(row and row["ok"] == 1)
+
+
+def to_vector(values: list[float]) -> str:
+    """Render a float list as a pgvector literal: '[0.1,0.2,...]'."""
+    return "[" + ",".join(repr(float(v)) for v in values) + "]"

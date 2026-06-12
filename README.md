@@ -5,14 +5,19 @@ ideate → score → script → fact-check → voice → assemble → thumbnail 
 → analyze → learn, with human approval gates that progressively disable ("autonomy as a
 dial").
 
-> **Status: Phase 0 (Foundations) complete.** Monorepo, DB schema + migrations, provider
-> interfaces, cost logger, local docker-compose, and the acceptance demo. Phases 1–5
-> (agents, n8n workflows, Remotion, publishing, learning loop) are scaffolded but not built.
+> **Status: Phases 0–1 complete.**
+> - **Phase 0 (Foundations):** monorepo, DB schema + migrations, provider interfaces, cost
+>   logger, docker-compose, acceptance demo.
+> - **Phase 1 (Research → Scored Topics):** Trend Scout + Topic Scorer agents, BGE-M3/mock
+>   embeddings, RSS/Reddit polling, WF1/WF2 n8n workflows, and the `/research` dashboard.
+>
+> Phases 2–5 (script factory, production, publishing, learning loop) are scaffolded, not built.
 
 ## Quickstart
 ```bash
 cp .env.example .env
 make demo-phase-0     # clean migrate + verify schema + worker /health green
+make demo-phase-1     # research -> >=30 deduped scored topics w/ rationale (no API keys)
 ```
 Requires: Docker + docker compose, Node 20+ (corepack), uv (for Python tests).
 
@@ -24,6 +29,7 @@ Operations: [docs/runbook.md](docs/runbook.md). Script voice: [docs/voice-guide.
 | Target | Description |
 |---|---|
 | `make demo-phase-0` | Phase 0 acceptance: clean migration + schema check + worker health |
+| `make demo-phase-1` | Phase 1 acceptance: research → ≥30 deduped scored topics (mock providers) |
 | `make up` / `make down` | start / stop db + worker |
 | `make db-reset` | drop public schema, re-apply all migrations in order |
 | `make db-verify` | assert tables, HNSW indexes, seed data |

@@ -1,0 +1,32 @@
+{
+  "name": "WF2 Score & Plan",
+  "active": false,
+  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "cronExpression", "expression": "0 6 * * *" } ] }
+      },
+      "id": "trigger-0600-ist",
+      "name": "Daily 06:00 IST",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [ 240, 300 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/topic_scorer",
+        "options": { "timeout": 300000 }
+      },
+      "id": "http-scorer",
+      "name": "Score new topics (topic_scorer)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [ 520, 300 ]
+    }
+  ],
+  "connections": {
+    "Daily 06:00 IST": { "main": [ [ { "node": "Score new topics (topic_scorer)", "type": "main", "index": 0 } ] ] }
+  }
+}

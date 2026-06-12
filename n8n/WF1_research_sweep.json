@@ -1,0 +1,45 @@
+{
+  "name": "WF1 Research Sweep",
+  "active": false,
+  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "hours", "hoursInterval": 2 } ] }
+      },
+      "id": "trigger-2h",
+      "name": "Every 2 hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [ 240, 300 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/research_sweep",
+        "options": { "timeout": 120000 }
+      },
+      "id": "http-sweep",
+      "name": "Poll sources (research_sweep)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [ 520, 300 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/trend_scout",
+        "options": { "timeout": 300000 }
+      },
+      "id": "http-scout",
+      "name": "Cluster into topics (trend_scout)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [ 820, 300 ]
+    }
+  ],
+  "connections": {
+    "Every 2 hours": { "main": [ [ { "node": "Poll sources (research_sweep)", "type": "main", "index": 0 } ] ] },
+    "Poll sources (research_sweep)": { "main": [ [ { "node": "Cluster into topics (trend_scout)", "type": "main", "index": 0 } ] ] }
+  }
+}

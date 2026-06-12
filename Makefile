@@ -68,3 +68,11 @@ test-py: ## Run Python worker tests
 .PHONY: demo-phase-0
 demo-phase-0: ## Acceptance: clean migration + table/index check + worker /health green
 	@scripts/demo-phase-0.sh
+
+.PHONY: demo-phase-1
+demo-phase-1: db-reset ## Acceptance: research -> >=30 deduped scored topics w/ rationale (mock providers)
+	@echo ">> Phase 1 demo (mock LLM + mock embeddings, no API keys)"
+	@cd apps/worker && \
+		DATABASE_URL=postgresql://$(DB_USER):postgres@localhost:$${DB_PORT:-54322}/$(DB_NAME) \
+		USE_MOCK_PROVIDERS=true EMBEDDINGS_BACKEND=mock \
+		uv run python -m app.demo_phase1

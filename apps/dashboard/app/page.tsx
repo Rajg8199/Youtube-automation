@@ -8,9 +8,14 @@ export default function Home() {
         Phase 0 foundations. Pipeline, Research, Studio, and Analytics views land in
         Phases 1–5.
       </p>
-      <Link href="/system" className="text-brand-orange underline">
-        → System health
-      </Link>
+      <div className="flex flex-col gap-2">
+        <Link href="/research" className="text-brand-orange underline">
+          → Research Queue
+        </Link>
+        <Link href="/system" className="text-brand-orange underline">
+          → System health
+        </Link>
+      </div>
     </div>
   );
 }
