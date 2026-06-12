@@ -80,6 +80,57 @@ class AnthropicClient:
         raise last_err
 
 
+class GeminiClient:
+    """Google Gemini client (free tier) — non-Claude provider behind the same protocol.
+
+    Uses the official `google-genai` SDK (optional extra: `uv sync --extra gemini`).
+    The SDK is lazy-imported so tests and the default install don't require it.
+    """
+
+    def __init__(self, api_key: str, max_retries: int = 3) -> None:
+        self._api_key = api_key
+        self._max_retries = max_retries
+        self._client = None  # lazily constructed
+
+    def _ensure(self):
+        if self._client is None:
+            from google import genai  # heavy/optional import
+
+            self._client = genai.Client(api_key=self._api_key)
+        return self._client
+
+    def complete(
+        self, *, system: str, prompt: str, model: str, max_tokens: int = 2048
+    ) -> LLMResponse:
+        from google.genai import types
+
+        client = self._ensure()
+        last_err: Exception | None = None
+        for attempt in range(self._max_retries):
+            try:
+                resp = client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system,
+                        max_output_tokens=max_tokens,
+                    ),
+                )
+                usage = getattr(resp, "usage_metadata", None)
+                return LLMResponse(
+                    text=resp.text or "",
+                    input_tokens=getattr(usage, "prompt_token_count", 0) or 0,
+                    output_tokens=getattr(usage, "candidates_token_count", 0) or 0,
+                    model=model,
+                )
+            except Exception as e:  # noqa: BLE001 - retry then surface
+                last_err = e
+                if attempt < self._max_retries - 1:
+                    time.sleep(2**attempt)
+        assert last_err is not None
+        raise last_err
+
+
 @dataclass
 class MockLLMClient:
     """Returns canned responses keyed by model, or a default. For tests/CI."""
@@ -101,7 +152,17 @@ class MockLLMClient:
         )
 
 
-def get_llm_client(*, use_mock: bool, api_key: str) -> LLMClient:
-    if use_mock or not api_key:
+def get_llm_client(
+    *,
+    provider: str = "anthropic",
+    use_mock: bool = False,
+    anthropic_api_key: str = "",
+    gemini_api_key: str = "",
+) -> LLMClient:
+    """Select the LLM client by provider. Falls back to the mock when the required
+    key is missing, so a keyless dev environment never errors."""
+    if use_mock:
         return MockLLMClient()
-    return AnthropicClient(api_key=api_key)
+    if provider == "gemini":
+        return GeminiClient(api_key=gemini_api_key) if gemini_api_key else MockLLMClient()
+    return AnthropicClient(api_key=anthropic_api_key) if anthropic_api_key else MockLLMClient()

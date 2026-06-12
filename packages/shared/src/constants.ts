@@ -12,7 +12,7 @@ export const MODELS = {
 
 export type ModelId = (typeof MODELS)[keyof typeof MODELS];
 
-export type StackTier = "budget" | "premium";
+export type StackTier = "free" | "budget" | "premium";
 
 /** Operating-economics targets (USD) from the master spec §13. */
 export const COST_TARGETS = {

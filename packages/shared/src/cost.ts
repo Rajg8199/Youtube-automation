@@ -10,6 +10,9 @@ export const MODEL_PRICING: Record<string, [number, number]> = {
   [MODELS.haiku]: [1.0, 5.0],
   [MODELS.sonnet]: [3.0, 15.0],
   [MODELS.opus]: [5.0, 25.0],
+  // Gemini free tier ($0 within quota) — used by STACK_TIER=free.
+  "gemini-2.0-flash": [0.0, 0.0],
+  "gemini-2.5-flash": [0.0, 0.0],
 };
 
 /** USD per 1k characters. */

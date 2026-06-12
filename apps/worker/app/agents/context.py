@@ -20,6 +20,11 @@ def build_context(settings: Settings | None = None) -> AgentContext:
     s = settings or get_settings()
     return AgentContext(
         settings=s,
-        llm=get_llm_client(use_mock=s.use_mock_providers, api_key=s.anthropic_api_key),
+        llm=get_llm_client(
+            provider=s.llm_provider,
+            use_mock=s.use_mock_providers,
+            anthropic_api_key=s.anthropic_api_key,
+            gemini_api_key=s.gemini_api_key,
+        ),
         embedder=get_embedding_provider(s.effective_embeddings_backend),
     )

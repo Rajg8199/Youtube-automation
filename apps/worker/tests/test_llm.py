@@ -2,7 +2,13 @@
 
 import pytest
 
-from app.providers.llm import LLMResponse, MockLLMClient, get_llm_client
+from app.providers.llm import (
+    AnthropicClient,
+    GeminiClient,
+    LLMResponse,
+    MockLLMClient,
+    get_llm_client,
+)
 
 
 def _resp(text: str) -> LLMResponse:
@@ -41,5 +47,30 @@ def test_mock_client_records_calls_and_routes_by_model():
 
 
 def test_get_llm_client_falls_back_to_mock_without_key():
-    assert isinstance(get_llm_client(use_mock=False, api_key=""), MockLLMClient)
-    assert isinstance(get_llm_client(use_mock=True, api_key="sk-x"), MockLLMClient)
+    # No keys anywhere -> mock, regardless of provider.
+    assert isinstance(get_llm_client(provider="anthropic"), MockLLMClient)
+    assert isinstance(get_llm_client(provider="gemini"), MockLLMClient)
+
+
+def test_use_mock_overrides_keys():
+    assert isinstance(
+        get_llm_client(use_mock=True, anthropic_api_key="sk-x", gemini_api_key="g-x"),
+        MockLLMClient,
+    )
+
+
+def test_routes_to_anthropic_when_keyed():
+    client = get_llm_client(provider="anthropic", anthropic_api_key="sk-x")
+    assert isinstance(client, AnthropicClient)
+
+
+def test_routes_to_gemini_when_keyed():
+    # GeminiClient lazy-imports the SDK only on .complete(), so construction needs no package.
+    client = get_llm_client(provider="gemini", gemini_api_key="g-x")
+    assert isinstance(client, GeminiClient)
+
+
+def test_gemini_provider_without_key_is_mock():
+    assert isinstance(
+        get_llm_client(provider="gemini", anthropic_api_key="sk-x"), MockLLMClient
+    )

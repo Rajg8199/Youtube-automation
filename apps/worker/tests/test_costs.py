@@ -17,6 +17,11 @@ def test_llm_cost_haiku_zero_tokens():
     assert llm_cost_usd("claude-haiku-4-5-20251001", 0, 0) == 0.0
 
 
+def test_gemini_free_tier_is_zero_cost():
+    assert llm_cost_usd("gemini-2.0-flash", 100_000, 50_000) == 0.0
+    assert llm_cost_usd("gemini-2.5-flash", 100_000, 50_000) == 0.0
+
+
 def test_llm_cost_unknown_model():
     with pytest.raises(ValueError):
         llm_cost_usd("gpt-nope", 10, 10)

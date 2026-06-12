@@ -7,7 +7,21 @@ from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-StackTier = Literal["budget", "premium"]
+StackTier = Literal["free", "budget", "premium"]
+Role = Literal["classify", "script", "strategy"]
+
+# Per-role model maps. `free` uses Google Gemini (free tier); budget/premium use Claude.
+# Keep model IDs in sync with costs.py MODEL_PRICING.
+_GEMINI_MODELS: dict[str, str] = {
+    "classify": "gemini-2.0-flash",  # fast, free
+    "script": "gemini-2.5-flash",    # stronger reasoning for scoring/scripts, free tier
+    "strategy": "gemini-2.5-flash",
+}
+_CLAUDE_MODELS: dict[str, str] = {
+    "classify": "claude-haiku-4-5-20251001",
+    "script": "claude-sonnet-4-6",
+    "strategy": "claude-opus-4-8",
+}
 
 
 class Settings(BaseSettings):
@@ -23,6 +37,7 @@ class Settings(BaseSettings):
     # ---- Phase 1: research → scored topics ----
     embeddings_backend: Literal["mock", "bge-m3"] = "bge-m3"
     anthropic_api_key: str = ""
+    gemini_api_key: str = ""
     # When true (tests/CI), agents use mock LLM + mock embeddings regardless of tier.
     use_mock_providers: bool = False
 
@@ -33,13 +48,15 @@ class Settings(BaseSettings):
     http_user_agent: str = "PhoneWalaGyanBot/0.1 (+https://youtube.com/@phonewalagyan)"
     poll_timeout_sec: float = 20.0
 
-    def model_for(self, role: Literal["classify", "script", "strategy"]) -> str:
-        """Pick a Claude model by role, honoring budget vs premium tier."""
-        if role == "classify":
-            return "claude-haiku-4-5-20251001"
-        if role == "strategy":
-            return "claude-opus-4-8"
-        return "claude-sonnet-4-6"
+    @property
+    def llm_provider(self) -> Literal["gemini", "anthropic"]:
+        """`free` tier → Gemini (free); `budget`/`premium` → Claude."""
+        return "gemini" if self.stack_tier == "free" else "anthropic"
+
+    def model_for(self, role: Role) -> str:
+        """Pick a model by role for the active tier's provider."""
+        table = _GEMINI_MODELS if self.llm_provider == "gemini" else _CLAUDE_MODELS
+        return table[role]
 
     @property
     def effective_embeddings_backend(self) -> str:

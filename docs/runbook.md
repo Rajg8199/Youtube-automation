@@ -20,6 +20,15 @@ then open `/research` (greenlight/reject, factor breakdown, signal firehose).
 
 **Provider modes** (`.env`): keyless dev uses `USE_MOCK_PROVIDERS=true` + `EMBEDDINGS_BACKEND=mock`.
 Production: set `USE_MOCK_PROVIDERS=false`, `EMBEDDINGS_BACKEND=bge-m3`, and `ANTHROPIC_API_KEY`.
+
+**Free ($0/month) run** — `STACK_TIER=free` routes all agents to Gemini's free tier:
+```bash
+cd apps/worker && uv sync --extra gemini   # one-time: install the Google SDK
+# .env: STACK_TIER=free, USE_MOCK_PROVIDERS=false, EMBEDDINGS_BACKEND=bge-m3,
+#       GEMINI_API_KEY=<from aistudio.google.com/apikey>
+```
+With no `GEMINI_API_KEY`, the free tier safely falls back to the mock LLM (jobs still run).
+Tradeoffs and the Claude-for-scripts hybrid are in `docs/decisions.md` ADR-0008.
 With mock LLM, `trend_scout` still creates topics but `topic_scorer` needs a real key (the
 mock returns no factor scores) — use `make demo-phase-1` for the deterministic full-path proof.
 

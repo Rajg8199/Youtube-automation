@@ -19,6 +19,10 @@ dependencies = [
 embeddings = [
     "sentence-transformers>=3.3.0",
 ]
+# Free-tier LLM provider (STACK_TIER=free). Lazy-imported; not needed for tests/dev.
+gemini = [
+    "google-genai>=1.0.0",
+]
 
 [dependency-groups]
 dev = [

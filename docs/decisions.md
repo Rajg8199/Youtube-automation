@@ -88,3 +88,25 @@ swap in Cohere `embed-multilingual-v3.0` (also 1024-dim native) behind the same 
 an `EmbeddingProvider` interface (mock + bge-m3 adapter) so the model is swappable and tests
 run without it. If RAM on the Oracle ARM VM is tight, run embeddings as a separate small
 service (documented in the runbook when Phase 1 deploys).
+
+---
+
+## ADR-0008 — `free` tier: Gemini (free) LLM for a $0/month pipeline
+**Status:** Accepted
+**Context:** Every component except the LLM is already free in the budget tier (BGE-M3
+embeddings, Edge TTS, Remotion render, RSS/Reddit research, Supabase/Oracle/Vercel free
+tiers, YouTube API). The LLM was the only real cost. User asked for a zero-spend option.
+**Decision:** Add a third tier `STACK_TIER=free` that routes all agents to **Google Gemini**
+free tier (`gemini-2.0-flash` for classify, `gemini-2.5-flash` for scoring/scripts/strategy)
+via the official `google-genai` SDK, behind the existing `LLMClient` protocol. `budget`/
+`premium` stay on Claude. Selection is `Settings.llm_provider` (free→gemini, else→anthropic)
+and a tier-aware `model_for(role)`.
+**Justification:** Gemini Flash has a genuinely usable free quota (well above 5 long + 10
+shorts/week) and strong Hindi/Hinglish. It is the best quality-per-$0 for this channel.
+**Non-Claude note:** per the claude-api skill, `GeminiClient` is plain provider code (the
+Google SDK), not Anthropic SDK code — a deliberate, user-requested non-Claude implementation.
+**Consequences:** Free-tier rate limits and weaker output on the hardest task (Hinglish
+*script writing*, Phase 2) — a Claude-for-scripts hybrid (~$2–5/mo) is the documented
+fallback. `google-genai` is an optional extra (`uv sync --extra gemini`), lazy-imported so
+tests/default install don't need it. Gemini model IDs are priced at $0 in the cost calculator
+(free within quota); review Google's free-tier terms (rate limits, data-use, commercial use).

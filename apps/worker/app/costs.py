@@ -22,6 +22,9 @@ MODEL_PRICING: dict[str, tuple[float, float]] = {
     "claude-haiku-4-5-20251001": (1.00, 5.00),
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-opus-4-8": (5.00, 25.00),
+    # Gemini free tier ($0 within quota). Pricing here is for cost accounting only.
+    "gemini-2.0-flash": (0.0, 0.0),
+    "gemini-2.5-flash": (0.0, 0.0),
 }
 
 # ---- TTS pricing (USD per 1k characters) ----
