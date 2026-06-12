@@ -73,10 +73,18 @@ If drift becomes a problem, generate one from the other.
 
 ---
 
-## ADR-0007 — Embedding dimension fixed at 1024
-**Status:** Accepted (constraint inherited from spec schema)
-**Context:** All `vector` columns are `vector(1024)`.
-**Decision:** Standardize on a 1024-dim embedding model (e.g. Sarvam embeddings or a
-Cohere/Matryoshka model truncated to 1024). Provider stays unwired in Phase 0.
-**Consequences:** Whatever embedding provider Phase 1 picks must output (or be reduced to)
-exactly 1024 dims, or the migration changes.
+## ADR-0007 — Embeddings: BGE-M3 self-hosted (1024-dim)
+**Status:** Accepted (supersedes the Phase 0 placeholder)
+**Context:** All `vector` columns are `vector(1024)`. We needed an Indic/Hindi-capable
+1024-dim embedder that fits the budget tier. **Sarvam was the first choice but has no
+embeddings API** — its endpoints are chat, translation, STT, TTS, transliteration, and
+language ID only (verified: https://docs.sarvam.ai/api-reference-docs/introduction).
+**Decision:** Use **BGE-M3** (BAAI), self-hosted in the worker via sentence-transformers.
+1024-dim native, strong multilingual incl. Hindi, MIT-licensed, **zero per-call cost**.
+**Justification:** Keeps the budget tier genuinely cheap (no embedding line item), India-
+capable, and removes an external dependency/key from the hot path. Premium tier may later
+swap in Cohere `embed-multilingual-v3.0` (also 1024-dim native) behind the same interface.
+**Consequences:** The worker image gains a model download (~2GB) and CPU/torch deps; we add
+an `EmbeddingProvider` interface (mock + bge-m3 adapter) so the model is swappable and tests
+run without it. If RAM on the Oracle ARM VM is tight, run embeddings as a separate small
+service (documented in the runbook when Phase 1 deploys).
