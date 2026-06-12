@@ -11,7 +11,7 @@ def _settings(**kw) -> Settings:
 def test_free_tier_uses_gemini():
     s = _settings(stack_tier="free")
     assert s.llm_provider == "gemini"
-    assert s.model_for("classify") == "gemini-2.0-flash"
+    assert s.model_for("classify") == "gemini-2.5-flash"
     assert s.model_for("script") == "gemini-2.5-flash"
 
 

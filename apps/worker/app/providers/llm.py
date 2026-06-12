@@ -126,7 +126,8 @@ class GeminiClient:
             except Exception as e:  # noqa: BLE001 - retry then surface
                 last_err = e
                 if attempt < self._max_retries - 1:
-                    time.sleep(2**attempt)
+                    # Free-tier 429s reset on ~minute windows — back off longer than Claude.
+                    time.sleep(8 * (attempt + 1))
         assert last_err is not None
         raise last_err
 

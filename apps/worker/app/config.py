@@ -12,9 +12,11 @@ Role = Literal["classify", "script", "strategy"]
 
 # Per-role model maps. `free` uses Google Gemini (free tier); budget/premium use Claude.
 # Keep model IDs in sync with costs.py MODEL_PRICING.
+# gemini-2.5-flash across roles: 2.0-flash's free-tier request quota is 0 on some
+# projects/regions, whereas 2.5-flash is broadly available on the free tier.
 _GEMINI_MODELS: dict[str, str] = {
-    "classify": "gemini-2.0-flash",  # fast, free
-    "script": "gemini-2.5-flash",    # stronger reasoning for scoring/scripts, free tier
+    "classify": "gemini-2.5-flash",
+    "script": "gemini-2.5-flash",
     "strategy": "gemini-2.5-flash",
 }
 _CLAUDE_MODELS: dict[str, str] = {

@@ -49,11 +49,13 @@ KNOWN_AGENTS: frozenset[str] = frozenset(
     }
 )
 
-# Jobs implemented now. Each returns a JSON-serializable summary dict.
-JOBS: dict[str, Callable[[], dict[str, Any]]] = {
-    "research_sweep": lambda: run_research_sweep(),
-    "trend_scout": lambda: run_trend_scout(build_context()),
-    "topic_scorer": lambda: run_topic_scorer(build_context()),
+# Jobs implemented now. Each takes an optional `limit` and returns a summary dict.
+# `limit` caps how many items an LLM-backed job processes — useful to stay under
+# free-tier rate limits on a manual run.
+JOBS: dict[str, Callable[[int], dict[str, Any]]] = {
+    "research_sweep": lambda limit: run_research_sweep(),
+    "trend_scout": lambda limit: run_trend_scout(build_context(), limit=limit),
+    "topic_scorer": lambda limit: run_topic_scorer(build_context(), limit=limit),
 }
 
 
@@ -77,10 +79,10 @@ def health() -> JSONResponse:
 
 
 @app.post("/jobs/{job}")
-def run_job(job: str) -> Any:
+def run_job(job: str, limit: int = 200) -> Any:
     if job in JOBS:
         try:
-            return {"job": job, "result": JOBS[job]()}
+            return {"job": job, "result": JOBS[job](limit)}
         except Exception as e:  # noqa: BLE001
             log_system_event(
                 severity="error", component=f"job:{job}", message="job failed", detail={"error": str(e)}
