@@ -1,0 +1,10 @@
+{
+  "name": "@pwg/agents",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "LLM agent definitions, versioned prompts, and IO schemas (Phases 1-5).",
+  "scripts": {
+    "typecheck": "echo 'no sources yet (Phase 1+)'"
+  }
+}

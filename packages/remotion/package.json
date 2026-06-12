@@ -1,0 +1,10 @@
+{
+  "name": "@pwg/remotion",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Remotion compositions, templates, and brand kit (Phase 3).",
+  "scripts": {
+    "typecheck": "echo 'no compositions yet (Phase 3)'"
+  }
+}

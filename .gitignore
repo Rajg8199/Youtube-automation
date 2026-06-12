@@ -1,0 +1,41 @@
+# ---- Node / pnpm ----
+node_modules/
+.pnpm-store/
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.uv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Env / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Supabase / DB ----
+supabase/.branches/
+supabase/.temp/
+*.dump
+
+# ---- Render / media artifacts ----
+out/
+renders/
+*.mp4
+*.wav
+*.mp3
+!packages/remotion/assets/**
+
+# ---- OS / editor ----
+.DS_Store
+.idea/
+.vscode/
+*.log
