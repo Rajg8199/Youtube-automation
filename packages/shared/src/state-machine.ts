@@ -41,7 +41,7 @@ const TRANSITIONS: Record<ContentStatus, ContentStatus[]> = {
   scripting: ["script_qa", "failed"],
   script_qa: ["script_approved", "qa_failed"],
   qa_failed: ["scripting", "rejected"], // revise loop or give up
-  script_approved: ["voiceover"],
+  script_approved: ["voiceover", "qa_failed", "rejected"], // human gate: changes / reject
   voiceover: ["assembly", "failed"],
   assembly: ["thumbnail", "failed"],
   thumbnail: ["metadata", "failed"],

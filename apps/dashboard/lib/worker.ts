@@ -58,3 +58,41 @@ export async function decideTopic(
     body: JSON.stringify({ action }),
   });
 }
+
+export interface ScriptItem {
+  id: string;
+  working_title: string;
+  angle: string | null;
+  format: string;
+  status: string;
+  version: number | null;
+  hook: string | null;
+  body_markdown: string | null;
+  cta: string | null;
+  word_count: number | null;
+  est_duration_sec: number | null;
+  passed: boolean | null;
+  claims_checked: number | null;
+  claims_failed: { claim: string; reason: string }[] | null;
+  policy_flags: { type: string; note: string }[] | null;
+  readability_notes: string | null;
+  approval_status: string | null;
+}
+
+export async function getScripts(limit = 100): Promise<ScriptItem[]> {
+  const res = await fetch(`${WORKER_URL}/scripts?limit=${limit}`, { cache: "no-store" });
+  if (!res.ok) return [];
+  return (await res.json()).scripts ?? [];
+}
+
+export async function decideScript(
+  id: string,
+  action: "approve" | "request_changes" | "reject",
+  note?: string,
+): Promise<Response> {
+  return fetch(`${WORKER_URL}/content/${id}/script-decision`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, note }),
+  });
+}

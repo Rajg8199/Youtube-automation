@@ -12,6 +12,9 @@ export default function Home() {
         <Link href="/research" className="text-brand-orange underline">
           → Research Queue
         </Link>
+        <Link href="/scripts" className="text-brand-orange underline">
+          → Scripts
+        </Link>
         <Link href="/system" className="text-brand-orange underline">
           → System health
         </Link>

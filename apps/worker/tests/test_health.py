@@ -33,4 +33,5 @@ def test_unknown_agent_404():
 
 
 def test_known_agent_501():
-    assert client.post("/jobs/script_writer").status_code == 501
+    # voice_producer is a known agent but not implemented until Phase 3.
+    assert client.post("/jobs/voice_producer").status_code == 501

@@ -76,3 +76,11 @@ demo-phase-1: db-reset ## Acceptance: research -> >=30 deduped scored topics w/ 
 		DATABASE_URL=postgresql://$(DB_USER):postgres@localhost:$${DB_PORT:-54322}/$(DB_NAME) \
 		USE_MOCK_PROVIDERS=true EMBEDDINGS_BACKEND=mock \
 		uv run python -m app.demo_phase1
+
+.PHONY: demo-phase-2
+demo-phase-2: db-reset ## Acceptance: greenlit topic -> QA-passed Hinglish script, 0 unverified claims
+	@echo ">> Phase 2 demo (prompt-routing mock LLM, no API keys)"
+	@cd apps/worker && \
+		DATABASE_URL=postgresql://$(DB_USER):postgres@localhost:$${DB_PORT:-54322}/$(DB_NAME) \
+		USE_MOCK_PROVIDERS=true EMBEDDINGS_BACKEND=mock \
+		uv run python -m app.demo_phase2
