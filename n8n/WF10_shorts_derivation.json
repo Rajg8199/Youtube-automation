@@ -1,22 +1,61 @@
 {
+  "id": "pwg-wf10",
   "name": "WF10 Shorts Derivation",
   "active": false,
-  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "settings": {
+    "timezone": "Asia/Kolkata",
+    "saveExecutionProgress": true
+  },
   "nodes": [
     {
-      "parameters": { "rule": { "interval": [ { "field": "hours", "hoursInterval": 6 } ] } },
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
       "id": "trigger-6h",
       "name": "Every 6 hours",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [ 240, 300 ]
+      "position": [
+        240,
+        300
+      ]
     },
     {
-      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/shorts_derive", "options": { "timeout": 600000 } },
-      "id": "http-shorts", "name": "Shorts Derivation (9:16)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 520, 300 ]
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/shorts_derive",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "http-shorts",
+      "name": "Shorts Derivation (9:16)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ]
     }
   ],
   "connections": {
-    "Every 6 hours": { "main": [ [ { "node": "Shorts Derivation (9:16)", "type": "main", "index": 0 } ] ] }
+    "Every 6 hours": {
+      "main": [
+        [
+          {
+            "node": "Shorts Derivation (9:16)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   }
 }

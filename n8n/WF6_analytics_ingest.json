@@ -1,27 +1,89 @@
 {
+  "id": "pwg-wf6",
   "name": "WF6 Analytics Ingest",
   "active": false,
-  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "settings": {
+    "timezone": "Asia/Kolkata",
+    "saveExecutionProgress": true
+  },
   "nodes": [
     {
-      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "0 9 * * *" } ] } },
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
       "id": "trigger-0900",
       "name": "Daily 09:00 IST",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [ 240, 300 ]
+      "position": [
+        240,
+        300
+      ]
     },
     {
-      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/analytics_analyst", "options": { "timeout": 600000 } },
-      "id": "http-analytics", "name": "Analytics Analyst", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 520, 300 ]
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/analytics_analyst",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "http-analytics",
+      "name": "Analytics Analyst",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ]
     },
     {
-      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/learning", "options": { "timeout": 300000 } },
-      "id": "http-learning", "name": "Learning Loop", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 800, 300 ]
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/learning",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "http-learning",
+      "name": "Learning Loop",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        300
+      ]
     }
   ],
   "connections": {
-    "Daily 09:00 IST": { "main": [ [ { "node": "Analytics Analyst", "type": "main", "index": 0 } ] ] },
-    "Analytics Analyst": { "main": [ [ { "node": "Learning Loop", "type": "main", "index": 0 } ] ] }
+    "Daily 09:00 IST": {
+      "main": [
+        [
+          {
+            "node": "Analytics Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analytics Analyst": {
+      "main": [
+        [
+          {
+            "node": "Learning Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   }
 }

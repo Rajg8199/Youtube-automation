@@ -1,22 +1,61 @@
 {
+  "id": "pwg-wf7",
   "name": "WF7 Weekly Strategy",
   "active": false,
-  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "settings": {
+    "timezone": "Asia/Kolkata",
+    "saveExecutionProgress": true
+  },
   "nodes": [
     {
-      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "0 10 * * 0" } ] } },
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 0"
+            }
+          ]
+        }
+      },
       "id": "trigger-sun-1000",
       "name": "Sun 10:00 IST",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [ 240, 300 ]
+      "position": [
+        240,
+        300
+      ]
     },
     {
-      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/growth_strategist", "options": { "timeout": 300000 } },
-      "id": "http-strat", "name": "Growth Strategist", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 520, 300 ]
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/growth_strategist",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "http-strat",
+      "name": "Growth Strategist",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ]
     }
   ],
   "connections": {
-    "Sun 10:00 IST": { "main": [ [ { "node": "Growth Strategist", "type": "main", "index": 0 } ] ] }
+    "Sun 10:00 IST": {
+      "main": [
+        [
+          {
+            "node": "Growth Strategist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   }
 }

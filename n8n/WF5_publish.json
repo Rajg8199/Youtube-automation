@@ -1,22 +1,61 @@
 {
+  "id": "pwg-wf5",
   "name": "WF5 Publish",
   "active": false,
-  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "settings": {
+    "timezone": "Asia/Kolkata",
+    "saveExecutionProgress": true
+  },
   "nodes": [
     {
-      "parameters": { "rule": { "interval": [ { "field": "minutes", "minutesInterval": 30 } ] } },
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
       "id": "trigger-30m",
       "name": "Every 30 min",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [ 240, 300 ]
+      "position": [
+        240,
+        300
+      ]
     },
     {
-      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/publisher", "options": { "timeout": 1800000 } },
-      "id": "http-pub", "name": "Publisher (API or kit)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 520, 300 ]
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/publisher",
+        "options": {
+          "timeout": 1800000
+        }
+      },
+      "id": "http-pub",
+      "name": "Publisher (API or kit)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ]
     }
   ],
   "connections": {
-    "Every 30 min": { "main": [ [ { "node": "Publisher (API or kit)", "type": "main", "index": 0 } ] ] }
+    "Every 30 min": {
+      "main": [
+        [
+          {
+            "node": "Publisher (API or kit)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   }
 }

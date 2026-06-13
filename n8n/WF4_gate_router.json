@@ -1,22 +1,61 @@
 {
+  "id": "pwg-wf4",
   "name": "WF4 Gate Router",
   "active": false,
-  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "settings": {
+    "timezone": "Asia/Kolkata",
+    "saveExecutionProgress": true
+  },
   "nodes": [
     {
-      "parameters": { "rule": { "interval": [ { "field": "minutes", "minutesInterval": 10 } ] } },
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
       "id": "trigger-10m",
       "name": "Every 10 min",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [ 240, 300 ]
+      "position": [
+        240,
+        300
+      ]
     },
     {
-      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/gate_router", "options": { "timeout": 120000 } },
-      "id": "http-gate", "name": "Gate Router (autonomy)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 520, 300 ]
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORKER_URL }}/jobs/gate_router",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "http-gate",
+      "name": "Gate Router (autonomy)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ]
     }
   ],
   "connections": {
-    "Every 10 min": { "main": [ [ { "node": "Gate Router (autonomy)", "type": "main", "index": 0 } ] ] }
+    "Every 10 min": {
+      "main": [
+        [
+          {
+            "node": "Gate Router (autonomy)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   }
 }
