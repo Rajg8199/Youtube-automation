@@ -30,8 +30,11 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/phonewala}
       STACK_TIER: ${STACK_TIER:-budget}
+      MEDIA_DIR: /app/media
     ports:
       - "${WORKER_PORT:-8000}:8000"
+    volumes:
+      - media:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -43,3 +46,4 @@ services:
 
 volumes:
   pg_data:
+  media:

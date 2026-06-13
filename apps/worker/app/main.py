@@ -14,8 +14,11 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+import os
+
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .agents.context import build_context
@@ -29,10 +32,20 @@ from .agents.topic_scorer import run_topic_scorer
 from .config import get_settings
 from .db import cursor, ping
 from .events import log_pipeline_event, log_system_event
+from .production.pipeline import run_finalize, run_production_pipeline
+from .production.render_worker import run_render_worker
+from .production.thumbnail_designer import run_thumbnail_designer
+from .production.visual_director import run_visual_director
+from .production.voice_producer import run_voice_producer
 from .services.research_poll import run_research_sweep
 from .state_machine import transition
 
 app = FastAPI(title="PhoneWala Gyan Worker", version=__version__)
+
+# Serve rendered media (voiceover, scene cards, thumbnails, final video) for the dashboard.
+_media_dir = get_settings().media_dir
+os.makedirs(_media_dir, exist_ok=True)
+app.mount("/media", StaticFiles(directory=_media_dir), name="media")
 
 # Agents that will own /jobs endpoints across Phases 1-5 (404 vs 501 distinction).
 KNOWN_AGENTS: frozenset[str] = frozenset(
@@ -69,6 +82,13 @@ JOBS: dict[str, Callable[[int], dict[str, Any]]] = {
     "script_writer": lambda limit: run_script_writer(build_context(), limit=limit),
     "qa": lambda limit: run_qa(build_context(), limit=limit),
     "script_pipeline": lambda limit: run_script_pipeline(build_context(), limit=limit),
+    # Phase 3 — production (no LLM)
+    "voice_producer": lambda limit: run_voice_producer(limit=limit),
+    "visual_director": lambda limit: run_visual_director(limit=limit),
+    "render_worker": lambda limit: run_render_worker(limit=limit),
+    "thumbnail_designer": lambda limit: run_thumbnail_designer(limit=limit),
+    "finalize": lambda limit: run_finalize(limit=limit),
+    "production_pipeline": lambda limit: run_production_pipeline(limit=limit),
 }
 
 
@@ -277,3 +297,48 @@ def script_decision(
                    detail={"gate": "script", "note": note})
     _decide("changes_requested")
     return {"id": content_id, "status": "qa_failed", "approval": "changes_requested"}
+
+
+# ---- Phase 3: production / Studio ----
+
+_STUDIO_STAGE = ("script_approved", "voiceover", "assembly", "thumbnail", "metadata", "ready_for_review")
+
+
+@app.get("/studio")
+def studio(limit: int = 50) -> dict[str, Any]:
+    """Content items in the production stage with their media artifacts for the Studio view."""
+    with cursor() as cur:
+        cur.execute(
+            """
+            select ci.id, ci.working_title, ci.format, ci.status, ci.priority,
+                   vo.storage_path as voiceover_path, vo.duration_sec::float8 as voiceover_duration,
+                   fv.storage_path as video_path, fv.duration_sec::float8 as video_duration,
+                   sp.scenes,
+                   (select json_agg(json_build_object(
+                              'variant', t.variant, 'path', m.storage_path,
+                              'selected', t.is_selected, 'concept', t.concept)
+                            order by t.variant)
+                      from thumbnails t join media_assets m on m.id = t.asset_id
+                      where t.content_item_id = ci.id) as thumbnails
+            from content_items ci
+            left join lateral (
+                select storage_path, duration_sec from media_assets
+                where content_item_id = ci.id and kind = 'voiceover'
+                order by created_at desc limit 1
+            ) vo on true
+            left join lateral (
+                select storage_path, duration_sec from media_assets
+                where content_item_id = ci.id and kind = 'final_video'
+                order by created_at desc limit 1
+            ) fv on true
+            left join lateral (
+                select scenes from scene_plans where content_item_id = ci.id
+                order by created_at desc limit 1
+            ) sp on true
+            where ci.status = any(%s)
+            order by ci.priority desc, ci.created_at asc
+            limit %s
+            """,
+            (list(_STUDIO_STAGE), limit),
+        )
+        return {"studio": cur.fetchall()}

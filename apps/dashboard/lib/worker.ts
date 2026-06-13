@@ -2,6 +2,9 @@
 
 const WORKER_URL = process.env.WORKER_URL ?? "http://localhost:8008";
 
+/** Browser-reachable base for <audio>/<video>/<img> media tags. */
+export const mediaBase = WORKER_URL;
+
 export interface ScoredTopic {
   id: string;
   title: string;
@@ -95,4 +98,35 @@ export async function decideScript(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action, note }),
   });
+}
+
+export interface SceneEntry {
+  idx: number;
+  template: string;
+  caption: string;
+  duration: number;
+}
+export interface ThumbVariant {
+  variant: string;
+  path: string;
+  selected: boolean;
+  concept: string;
+}
+export interface StudioItem {
+  id: string;
+  working_title: string;
+  format: string;
+  status: string;
+  voiceover_path: string | null;
+  voiceover_duration: number | null;
+  video_path: string | null;
+  video_duration: number | null;
+  scenes: SceneEntry[] | null;
+  thumbnails: ThumbVariant[] | null;
+}
+
+export async function getStudioItems(limit = 50): Promise<StudioItem[]> {
+  const res = await fetch(`${WORKER_URL}/studio?limit=${limit}`, { cache: "no-store" });
+  if (!res.ok) return [];
+  return (await res.json()).studio ?? [];
 }

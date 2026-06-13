@@ -110,3 +110,22 @@ Google SDK), not Anthropic SDK code — a deliberate, user-requested non-Claude 
 fallback. `google-genai` is an optional extra (`uv sync --extra gemini`), lazy-imported so
 tests/default install don't need it. Gemini model IDs are priced at $0 in the cost calculator
 (free within quota); review Google's free-tier terms (rate limits, data-use, commercial use).
+
+---
+
+## ADR-0009 — Phase 3 renderer: Pillow + FFmpeg locally; Remotion as the production path
+**Status:** Accepted
+**Context:** The spec names Remotion (programmatic React video) as the primary renderer.
+Remotion needs Node + headless Chrome and is heavy to run in the current local/Docker
+environment, but the user wanted a visible, $0 video now.
+**Decision:** Implement a **Pillow + FFmpeg** render worker for the free/local path: each
+scene → a branded 1920×1080 PNG card (Hindi via Noto Devanagari), concatenated and timed to
+the Edge TTS voiceover into a 1080p MP4, with a sidecar `.srt`. The Visual Director is
+**deterministic** (parses the script's `[SCENE:]` markers) so production needs **zero LLM**
+(no Gemini-quota pressure). Remotion stays the documented production-grade renderer, swappable
+behind the same `VideoRenderer` interface (packages/providers).
+**Consequences:** Visuals are clean branded cards, not Remotion's animated templates — good
+enough to watch and validate the pipeline end to end at $0. TTS = free Edge TTS (`hi-IN`
+neural). Media is written to a Docker volume and served at `/media`. When richer motion is
+needed, build the 7 Remotion templates and point the renderer interface at them; the rest of
+the pipeline (voice, scene plan, thumbnails, finalize, Studio UI) is unchanged.

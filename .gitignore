@@ -29,9 +29,12 @@ supabase/.temp/
 # ---- Render / media artifacts ----
 out/
 renders/
+media/
+apps/worker/media/
 *.mp4
 *.wav
 *.mp3
+*.srt
 !packages/remotion/assets/**
 
 # ---- OS / editor ----

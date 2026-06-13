@@ -23,6 +23,12 @@ embeddings = [
 gemini = [
     "google-genai>=1.0.0",
 ]
+# Phase 3 production (free): Edge TTS voice + Pillow scene cards/thumbnails.
+# Needs ffmpeg + a Devanagari font on the host/image (the worker image installs both).
+media = [
+    "edge-tts>=7.0.0",
+    "pillow>=11.0.0",
+]
 
 [dependency-groups]
 dev = [

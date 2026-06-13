@@ -10,8 +10,12 @@ dial").
 >   logger, docker-compose, acceptance demo.
 > - **Phase 1 (Research → Scored Topics):** Trend Scout + Topic Scorer agents, BGE-M3/mock
 >   embeddings, RSS/Reddit polling, WF1/WF2 n8n workflows, and the `/research` dashboard.
+> - **Phase 2 (Script Factory):** Editorial Planner, Research Compiler, Script Writer, QA
+>   hard-gate (+revise loop), Python state machine, and the `/scripts` dashboard + script gate.
+> - **Phase 3 (Production):** Voice Producer (Edge TTS), deterministic Visual Director, Pillow
+>   scene cards + FFmpeg render → 1080p MP4 + subtitles, Thumbnail Designer, and `/studio`.
 >
-> Phases 2–5 (script factory, production, publishing, learning loop) are scaffolded, not built.
+> Phases 4–5 (publishing + analytics, learning loop) are scaffolded, not built.
 
 ## Quickstart
 ```bash
@@ -30,6 +34,8 @@ Operations: [docs/runbook.md](docs/runbook.md). Script voice: [docs/voice-guide.
 |---|---|
 | `make demo-phase-0` | Phase 0 acceptance: clean migration + schema check + worker health |
 | `make demo-phase-1` | Phase 1 acceptance: research → ≥30 deduped scored topics (mock providers) |
+| `make demo-phase-2` | Phase 2 acceptance: greenlit topic → QA-passed Hinglish script (mock LLM) |
+| `make demo-phase-3` | Phase 3 acceptance: approved script → 1080p video + thumbnails + subtitles (in-container) |
 | `make up` / `make down` | start / stop db + worker |
 | `make db-reset` | drop public schema, re-apply all migrations in order |
 | `make db-verify` | assert tables, HNSW indexes, seed data |

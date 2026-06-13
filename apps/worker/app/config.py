@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     http_user_agent: str = "PhoneWalaGyanBot/0.1 (+https://youtube.com/@phonewalagyan)"
     poll_timeout_sec: float = 20.0
 
+    # ---- Phase 3: production ----
+    media_dir: str = "media"  # where rendered audio/video/thumbnails are written + served
+    tts_voice: str = "hi-IN-MadhurNeural"  # free Edge TTS Hindi voice
+    tts_voice_female: str = "hi-IN-SwaraNeural"
+
     @property
     def llm_provider(self) -> Literal["gemini", "anthropic"]:
         """`free` tier → Gemini (free); `budget`/`premium` → Claude."""

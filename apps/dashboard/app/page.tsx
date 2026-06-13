@@ -15,6 +15,9 @@ export default function Home() {
         <Link href="/scripts" className="text-brand-orange underline">
           → Scripts
         </Link>
+        <Link href="/studio" className="text-brand-orange underline">
+          → Studio
+        </Link>
         <Link href="/system" className="text-brand-orange underline">
           → System health
         </Link>
