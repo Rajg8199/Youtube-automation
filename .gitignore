@@ -42,3 +42,6 @@ apps/worker/media/
 .idea/
 .vscode/
 *.log
+
+# Exported publish-ready videos
+output/
