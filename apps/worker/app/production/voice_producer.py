@@ -30,6 +30,11 @@ def _fetch(cur, limit: int) -> list[dict[str, Any]]:
             order by sc.version desc limit 1
         ) s on true
         where ci.status = 'script_approved'
+          and (
+            coalesce((select mode from autonomy_settings where gate = 'script'), 'manual') <> 'manual'
+            or exists (select 1 from approvals a
+                       where a.content_item_id = ci.id and a.gate = 'script' and a.status = 'approved')
+          )
         order by ci.priority desc, ci.created_at asc
         limit %s
         """,

@@ -53,6 +53,18 @@ Operations: [docs/runbook.md](docs/runbook.md). Script voice: [docs/voice-guide.
 | `make test` | TS (vitest) + Python (pytest) unit tests |
 | `make typecheck` | typecheck TS workspaces |
 
+## Orchestration (n8n)
+`docker compose -f infra/docker-compose.yml up -d n8n` → http://localhost:5678. Import the
+thin scheduler workflows (WF1–WF10) from `n8n/` (`./n8n/import.sh`), then activate them in the
+UI. They poll the worker's `/jobs/*` endpoints on a schedule; with the autonomy gates on auto
+(`/insights`), the pipeline runs research → script → render → publish → analytics → learning
+hands-off. See `n8n/README.md`.
+
+## Dashboard
+Sidebar nav with a **Command Center** (pipeline funnel, KPIs, cost vs budget, activity feed)
+plus Research, Scripts, Studio, Publish, Published, Insights, and System views.
+`WORKER_URL=http://localhost:8008 pnpm --filter @pwg/dashboard dev`.
+
 ## Stack
 n8n (orchestration) · Claude Haiku/Sonnet/Opus (LLM) · Remotion+FFmpeg (render) ·
 Sarvam/ElevenLabs/Edge (TTS) · Supabase Postgres+pgvector (data) · Next.js (dashboard) ·

@@ -186,6 +186,27 @@ export async function getVideos(limit = 50): Promise<PublishedVideo[]> {
   return (await res.json()).videos ?? [];
 }
 
+export interface Overview {
+  kpis: {
+    topics_scored: number;
+    topics_greenlit: number;
+    in_flight: number;
+    published_videos: number;
+    cost_mtd_usd: number;
+    monthly_cap_usd: number;
+    stack_tier: string;
+  };
+  quota: { used: number; remaining: number; daily: number };
+  funnel: { status: string; count: number }[];
+  recent: { severity: string; component: string; message: string; created_at: string }[];
+}
+
+export async function getOverview(): Promise<Overview | null> {
+  const res = await fetch(`${WORKER_URL}/overview`, { cache: "no-store" });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export interface Insight {
   id: string;
   scope: string;

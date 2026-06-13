@@ -1,0 +1,37 @@
+{
+  "name": "WF3 Production Line",
+  "active": false,
+  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [ { "field": "minutes", "minutesInterval": 20 } ] } },
+      "id": "trigger-20m",
+      "name": "Every 20 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [ 200, 300 ]
+    },
+    {
+      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/research_compiler", "options": { "timeout": 300000 } },
+      "id": "http-compiler", "name": "Research Compiler", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 440, 300 ]
+    },
+    {
+      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/script_pipeline", "options": { "timeout": 600000 } },
+      "id": "http-script", "name": "Script Pipeline", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 700, 300 ]
+    },
+    {
+      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/production_pipeline", "options": { "timeout": 1800000 } },
+      "id": "http-prod", "name": "Production Pipeline", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 960, 300 ]
+    },
+    {
+      "parameters": { "method": "POST", "url": "={{ $env.WORKER_URL }}/jobs/seo_optimizer", "options": { "timeout": 300000 } },
+      "id": "http-seo", "name": "SEO Optimizer", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 1220, 300 ]
+    }
+  ],
+  "connections": {
+    "Every 20 min": { "main": [ [ { "node": "Research Compiler", "type": "main", "index": 0 } ] ] },
+    "Research Compiler": { "main": [ [ { "node": "Script Pipeline", "type": "main", "index": 0 } ] ] },
+    "Script Pipeline": { "main": [ [ { "node": "Production Pipeline", "type": "main", "index": 0 } ] ] },
+    "Production Pipeline": { "main": [ [ { "node": "SEO Optimizer", "type": "main", "index": 0 } ] ] }
+  }
+}

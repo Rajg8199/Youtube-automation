@@ -1,0 +1,22 @@
+{
+  "name": "WF8 Health & Costs",
+  "active": false,
+  "settings": { "timezone": "Asia/Kolkata", "saveExecutionProgress": true },
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [ { "field": "hours", "hoursInterval": 1 } ] } },
+      "id": "trigger-1h",
+      "name": "Hourly",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [ 240, 300 ]
+    },
+    {
+      "parameters": { "method": "GET", "url": "={{ $env.WORKER_URL }}/health", "options": { "timeout": 30000 } },
+      "id": "http-health", "name": "Worker health", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [ 520, 300 ]
+    }
+  ],
+  "connections": {
+    "Hourly": { "main": [ [ { "node": "Worker health", "type": "main", "index": 0 } ] ] }
+  }
+}

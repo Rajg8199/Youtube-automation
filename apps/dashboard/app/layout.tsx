@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
   title: "PhoneWala Gyan — Control",
@@ -10,11 +11,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <header className="border-b border-neutral-800 px-6 py-4">
-          <span className="text-brand-orange font-bold">PhoneWala Gyan</span>
-          <span className="text-neutral-500"> · Control</span>
-        </header>
-        <main className="p-6">{children}</main>
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <main className="flex-1 p-8 max-w-6xl">{children}</main>
+        </div>
       </body>
     </html>
   );

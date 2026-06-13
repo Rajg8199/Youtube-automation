@@ -38,6 +38,7 @@ from .production.thumbnail_designer import run_thumbnail_designer
 from .production.visual_director import run_visual_director
 from .production.voice_producer import run_voice_producer
 from .intelligence import autonomy
+from .intelligence.gate_router import run_gate_router
 from .intelligence.learning import run_learning
 from .intelligence.shorts import run_shorts_derivation
 from .intelligence.strategist import run_growth_strategist
@@ -105,6 +106,7 @@ JOBS: dict[str, Callable[[int], dict[str, Any]]] = {
     "learning": lambda limit: run_learning(limit=limit),
     "growth_strategist": lambda limit: run_growth_strategist(limit=limit),
     "shorts_derive": lambda limit: run_shorts_derivation(limit=limit),
+    "gate_router": lambda limit: run_gate_router(limit=limit),
 }
 
 
@@ -466,6 +468,58 @@ def videos(limit: int = 50) -> dict[str, Any]:
 
 
 # ---- Phase 5: intelligence + autonomy ----
+
+
+_FUNNEL_ORDER = [
+    "idea", "researched", "scripting", "script_qa", "qa_failed", "script_approved",
+    "voiceover", "assembly", "thumbnail", "metadata", "ready_for_review", "approved",
+    "scheduled", "publishing", "published",
+]
+_INFLIGHT = set(_FUNNEL_ORDER) - {"published"}
+
+
+@app.get("/overview")
+def overview() -> dict[str, Any]:
+    settings = get_settings()
+    with cursor() as cur:
+        cur.execute("select status, count(*) as n from content_items group by status")
+        by_status = {r["status"]: r["n"] for r in cur.fetchall()}
+        cur.execute("select count(*) as n from topics where status = 'scored'")
+        topics_scored = cur.fetchone()["n"]
+        cur.execute("select count(*) as n from topics where status = 'selected'")
+        topics_greenlit = cur.fetchone()["n"]
+        cur.execute("select count(*) as n from youtube_videos")
+        published_videos = cur.fetchone()["n"]
+        cur.execute(
+            "select coalesce(sum(amount_usd), 0) as c from costs "
+            "where created_at >= date_trunc('month', now())"
+        )
+        cost_mtd = float(cur.fetchone()["c"])
+        cur.execute(
+            """
+            select severity, component, message, created_at from system_events
+            order by id desc limit 12
+            """
+        )
+        recent = cur.fetchall()
+
+    funnel = [{"status": s, "count": by_status.get(s, 0)} for s in _FUNNEL_ORDER]
+    in_flight = sum(by_status.get(s, 0) for s in _INFLIGHT)
+    return {
+        "kpis": {
+            "topics_scored": topics_scored,
+            "topics_greenlit": topics_greenlit,
+            "in_flight": in_flight,
+            "published_videos": published_videos,
+            "cost_mtd_usd": round(cost_mtd, 4),
+            "monthly_cap_usd": settings.monthly_cost_cap_usd,
+            "stack_tier": settings.stack_tier,
+        },
+        "quota": {"used": quota.units_used_today(), "remaining": quota.remaining(),
+                  "daily": settings.youtube_daily_quota},
+        "funnel": funnel,
+        "recent": recent,
+    }
 
 
 @app.get("/insights")
