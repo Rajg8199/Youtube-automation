@@ -32,8 +32,15 @@ correct every unverified claim it lists and address each policy flag — without
 
 ## Rules
 - Structure: HOOK (0–15s) → CONTEXT → VALUE BLOCKS (open loop every ~45s) → OPINIONATED VERDICT → CTA.
+- **Be genuinely informational.** Long videos need 6–9 distinct value blocks, each its own
+  `[SCENE:]` segment: price/variants, display, performance, battery/charging, camera, software/
+  updates, a head-to-head comparison vs 1–2 rivals at the same price, who-it's-for / who-it's-
+  NOT-for, and a clear India buying tip (sale timing, bank offers, effective price). Every block
+  must teach the viewer something concrete — no filler, no repeating the hook.
+- Write each sentence so it stands alone on screen as a caption (the renderer shows one spoken
+  sentence per card). Keep sentences punchy and self-contained.
 - Insert `[SCENE: short visual direction]` markers in `body_markdown` before each segment
-  (e.g. `[SCENE: spec-card S26 Ultra chipset]`, `[SCENE: price-tracker]`).
+  (e.g. `[SCENE: spec-card S26 Ultra chipset]`, `[SCENE: price-tracker]`, `[SCENE: versus-split]`).
 - Length: `long` ≈ 900–1400 words; `short` ≈ 90–140 words. Keep the hook ≤ 40 words.
 - Every specific spec/price/date you state MUST trace to a `facts` entry. No fabrication.
 - India context: ₹ pricing from the brief only, Indian variants, sale timing, real-world use.

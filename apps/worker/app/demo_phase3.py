@@ -15,13 +15,29 @@ import sys
 from .db import close_pool, cursor
 from .production.pipeline import run_production_pipeline
 
-_HOOK = "OnePlus 14 India me aa gaya — lekin ₹72,999 ki keemat, kya ye justified hai?"
+_HOOK = (
+    "OnePlus 14 — ₹72,999 mein. Par kya ye paisa-vasool hai? "
+    "Kharidne se pehle ye 3 baatein zaroor jaan lo."
+)
 _BODY = (
-    "[SCENE: price-tracker] India me OnePlus 14 ₹72,999 se shuru hota hai, "
-    "12GB aur 256GB variant ke liye.\n\n"
-    "[SCENE: talking-points] Is price band me competition tagdi hai. "
-    "Mera take ye hai ki agar aapko clean software chahiye to ye solid choice hai.\n\n"
-    "[SCENE: spec-card] Baaki specs ke liye official launch ka wait karna better rahega."
+    "[SCENE: price-tracker] Pehle price. OnePlus 14 India mein ₹72,999 se shuru hota hai, "
+    "12GB aur 256GB variant ke liye, yaani sidha flagship segment mein.\n\n"
+    "[SCENE: spec-card] Display mein milta hai ek bada AMOLED panel high refresh rate ke saath, "
+    "to scrolling aur gaming dono butter-smooth lagte hain.\n\n"
+    "[SCENE: spec-card] Performance ke liye top-tier Snapdragon chip hai, jo heavy games aur "
+    "multitasking aaram se sambhal leta hai.\n\n"
+    "[SCENE: talking-points] Battery aur fast charging OnePlus ki purani strength hai — din bhar "
+    "ka backup aur jaldi charge hone ka combo yahan bhi milta hai.\n\n"
+    "[SCENE: versus-split] Ab comparison. Isi price par Samsung software updates mein aage hai, "
+    "jabki OnePlus clean aur tez experience deta hai.\n\n"
+    "[SCENE: talking-points] Kiske liye sahi hai? Agar smooth software, fast charging aur premium "
+    "build chahiye bina iPhone wali keemat ke — to ye strong choice hai.\n\n"
+    "[SCENE: talking-points] Kiske liye nahi? Agar camera aapki pehli priority hai ya sabse lamba "
+    "software support chahiye, to dusre options bhi dekh lena.\n\n"
+    "[SCENE: price-tracker] Ek tip: Flipkart aur Amazon sales mein bank offers ke saath effective "
+    "price kaafi neeche aa jaata hai — to sale ka wait karna samajhdari ho sakti hai.\n\n"
+    "[SCENE: talking-points] Mera verdict: ₹73,000 ke aas-paas OnePlus 14 ek complete all-rounder "
+    "hai, lekin sabse achhi deal sale mein hi banegi."
 )
 
 
