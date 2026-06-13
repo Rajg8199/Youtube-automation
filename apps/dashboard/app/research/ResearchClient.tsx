@@ -16,7 +16,7 @@ const FACTORS: { key: keyof ScoredTopic; label: string }[] = [
 function Bar({ value }: { value: number }) {
   const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
   return (
-    <div className="h-1.5 w-full rounded bg-neutral-800">
+    <div className="h-1.5 w-full rounded bg-surface-2">
       <div className="h-1.5 rounded bg-brand-orange" style={{ width: `${pct}%` }} />
     </div>
   );
@@ -29,14 +29,14 @@ function TopicRow({ t, onDecide, busy }: {
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-lg border border-neutral-800 p-3">
+    <div className="rounded-lg border border-line p-3">
       <div className="flex items-center gap-3">
         <div className="text-brand-orange font-mono text-lg w-14 text-right">
           {Number(t.composite).toFixed(2)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="truncate font-medium">{t.title}</div>
-          <div className="text-xs text-neutral-500">
+          <div className="text-xs text-fg-muted">
             {t.category ?? "uncategorized"} · {t.signal_count} signal
             {t.signal_count === 1 ? "" : "s"}
             {t.brands?.length ? ` · ${t.brands.join(", ")}` : ""}
@@ -44,12 +44,12 @@ function TopicRow({ t, onDecide, busy }: {
         </div>
         <button
           onClick={() => setOpen((o) => !o)}
-          className="text-xs text-neutral-400 hover:text-neutral-200"
+          className="text-xs text-fg-muted hover:text-fg"
         >
           {open ? "hide" : "why?"}
         </button>
         {t.status === "selected" ? (
-          <span className="text-xs text-green-500 px-2">✓ greenlit</span>
+          <span className="text-xs text-ok px-2">✓ greenlit</span>
         ) : (
           <>
             <button
@@ -62,7 +62,7 @@ function TopicRow({ t, onDecide, busy }: {
             <button
               disabled={busy === t.id}
               onClick={() => onDecide(t.id, "reject")}
-              className="rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-300 disabled:opacity-50"
+              className="rounded border border-line-strong px-2 py-1 text-xs text-fg disabled:opacity-50"
             >
               Reject
             </button>
@@ -74,16 +74,16 @@ function TopicRow({ t, onDecide, busy }: {
           <div className="grid grid-cols-6 gap-2">
             {FACTORS.map((f) => (
               <div key={f.key} className="space-y-1">
-                <div className="text-[10px] uppercase text-neutral-500">{f.label}</div>
+                <div className="text-[10px] uppercase text-fg-muted">{f.label}</div>
                 <Bar value={Number(t[f.key])} />
-                <div className="text-[10px] text-neutral-400">
+                <div className="text-[10px] text-fg-muted">
                   {Number(t[f.key]).toFixed(2)}
                 </div>
               </div>
             ))}
           </div>
           {t.rationale && (
-            <p className="text-sm text-neutral-300 italic">“{t.rationale}”</p>
+            <p className="text-sm text-fg italic">“{t.rationale}”</p>
           )}
         </div>
       )}
@@ -118,15 +118,15 @@ export default function ResearchClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 border-b border-neutral-800">
+      <div className="flex gap-4 border-b border-line">
         {(["topics", "signals"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
             className={`pb-2 text-sm ${
               tab === k
-                ? "border-b-2 border-brand-orange text-neutral-100"
-                : "text-neutral-500"
+                ? "border-b-2 border-brand-orange text-fg"
+                : "text-fg-muted"
             }`}
           >
             {k === "topics" ? `Scored topics (${topics.length})` : `Signal firehose (${signals.length})`}
@@ -136,7 +136,7 @@ export default function ResearchClient({
 
       {tab === "topics" ? (
         topics.length === 0 ? (
-          <p className="text-neutral-500">
+          <p className="text-fg-muted">
             No scored topics yet. Run the research sweep + trend scout + topic scorer
             (WF1/WF2), then refresh.
           </p>
@@ -148,17 +148,17 @@ export default function ResearchClient({
           </div>
         )
       ) : (
-        <div className="divide-y divide-neutral-900">
+        <div className="divide-y divide-line">
           {signals.map((s) => (
             <a
               key={s.id}
               href={s.url ?? "#"}
               target="_blank"
               rel="noreferrer"
-              className="block py-2 hover:bg-neutral-900/50"
+              className="block py-2 hover:bg-surface-2/50"
             >
               <div className="truncate text-sm">{s.title}</div>
-              <div className="text-xs text-neutral-500">
+              <div className="text-xs text-fg-muted">
                 {s.source ?? "?"} · {s.processed ? "processed" : "pending"}
               </div>
             </a>

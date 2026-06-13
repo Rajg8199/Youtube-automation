@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import type { ScriptItem } from "@/lib/worker";
 
 const STATUS_STYLE: Record<string, string> = {
-  script_approved: "text-green-500",
-  qa_failed: "text-red-500",
-  script_qa: "text-yellow-500",
-  scripting: "text-neutral-400",
+  script_approved: "text-ok",
+  qa_failed: "text-danger",
+  script_qa: "text-warn",
+  scripting: "text-fg-muted",
 };
 
 function Badge({ status }: { status: string }) {
   return (
-    <span className={`text-xs font-medium ${STATUS_STYLE[status] ?? "text-neutral-400"}`}>
+    <span className={`text-xs font-medium ${STATUS_STYLE[status] ?? "text-fg-muted"}`}>
       {status}
     </span>
   );
@@ -34,11 +34,11 @@ function Card({
   const mins = item.est_duration_sec ? Math.round(item.est_duration_sec / 6) / 10 : null;
 
   return (
-    <div className="rounded-lg border border-neutral-800 p-4 space-y-2">
+    <div className="rounded-lg border border-line p-4 space-y-2">
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <div className="truncate font-medium">{item.working_title}</div>
-          <div className="text-xs text-neutral-500">
+          <div className="text-xs text-fg-muted">
             <Badge status={item.status} /> · {item.format} · v{item.version ?? "—"} ·{" "}
             {item.word_count ?? "—"} words{mins ? ` · ~${mins} min` : ""}
             {item.approval_status ? ` · gate: ${item.approval_status}` : ""}
@@ -46,7 +46,7 @@ function Card({
         </div>
         <button
           onClick={() => setOpen((o) => !o)}
-          className="text-xs text-neutral-400 hover:text-neutral-200"
+          className="text-xs text-fg-muted hover:text-fg"
         >
           {open ? "hide script" : "view script"}
         </button>
@@ -54,26 +54,26 @@ function Card({
 
       {/* QA findings */}
       {item.passed === false && (
-        <div className="rounded border border-red-900/50 bg-red-950/30 p-2 text-sm">
-          <div className="text-red-400 font-medium">
+        <div className="rounded border border-danger/30 bg-danger/10 p-2 text-sm">
+          <div className="text-danger font-medium">
             QA failed — {failures.length} unverified claim{failures.length === 1 ? "" : "s"}
           </div>
-          <ul className="mt-1 list-disc pl-5 text-neutral-300 text-xs space-y-0.5">
+          <ul className="mt-1 list-disc pl-5 text-fg text-xs space-y-0.5">
             {failures.map((f, i) => (
               <li key={i}>
-                <span className="text-red-300">{f.claim}</span> — {f.reason}
+                <span className="text-danger">{f.claim}</span> — {f.reason}
               </li>
             ))}
           </ul>
         </div>
       )}
       {item.passed === true && (
-        <div className="text-sm text-green-500">
+        <div className="text-sm text-ok">
           ✓ QA passed — {item.claims_checked ?? 0} claims checked, 0 unverified
         </div>
       )}
       {flags.length > 0 && (
-        <div className="text-xs text-yellow-500">
+        <div className="text-xs text-warn">
           {flags.map((f, i) => (
             <div key={i}>⚑ {f.type}: {f.note}</div>
           ))}
@@ -81,20 +81,20 @@ function Card({
       )}
 
       {open && (
-        <div className="space-y-2 border-t border-neutral-800 pt-2">
+        <div className="space-y-2 border-t border-line pt-2">
           {item.angle && (
-            <p className="text-xs text-neutral-500">
-              <span className="text-neutral-400">Angle:</span> {item.angle}
+            <p className="text-xs text-fg-muted">
+              <span className="text-fg-muted">Angle:</span> {item.angle}
             </p>
           )}
           <p className="text-sm">
             <span className="text-brand-orange">HOOK · </span>
             {item.hook}
           </p>
-          <pre className="whitespace-pre-wrap text-sm text-neutral-300 font-sans">
+          <pre className="whitespace-pre-wrap text-sm text-fg font-sans">
             {item.body_markdown}
           </pre>
-          {item.cta && <p className="text-sm text-neutral-400">CTA · {item.cta}</p>}
+          {item.cta && <p className="text-sm text-fg-muted">CTA · {item.cta}</p>}
         </div>
       )}
 
@@ -111,14 +111,14 @@ function Card({
           <button
             disabled={busy === item.id}
             onClick={() => onDecide(item.id, "request_changes", "Please revise.")}
-            className="rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-300 disabled:opacity-50"
+            className="rounded border border-line-strong px-2 py-1 text-xs text-fg disabled:opacity-50"
           >
             Request changes
           </button>
           <button
             disabled={busy === item.id}
             onClick={() => onDecide(item.id, "reject")}
-            className="rounded border border-neutral-800 px-2 py-1 text-xs text-neutral-500 disabled:opacity-50"
+            className="rounded border border-line px-2 py-1 text-xs text-fg-muted disabled:opacity-50"
           >
             Reject
           </button>
@@ -152,9 +152,9 @@ export default function ScriptsClient({ items }: { items: ScriptItem[] }) {
 
   if (items.length === 0) {
     return (
-      <p className="text-neutral-500">
+      <p className="text-fg-muted">
         No scripts yet. Greenlight a topic in the Research Queue, then run the script pipeline
-        (<code className="text-neutral-400">POST /jobs/script_pipeline</code>).
+        (<code className="text-fg-muted">POST /jobs/script_pipeline</code>).
       </p>
     );
   }

@@ -202,9 +202,13 @@ export interface Overview {
 }
 
 export async function getOverview(): Promise<Overview | null> {
-  const res = await fetch(`${WORKER_URL}/overview`, { cache: "no-store" });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${WORKER_URL}/overview`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
 
 export interface Insight {

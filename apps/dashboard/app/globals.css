@@ -6,6 +6,36 @@
   color-scheme: dark;
 }
 
-body {
-  @apply bg-neutral-950 text-neutral-100;
+@layer base {
+  body {
+    @apply bg-bg text-fg antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* Tabular figures for all data/metrics so columns don't jitter. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Consistent, visible focus ring (a11y). */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-orange/60 ring-offset-2 ring-offset-bg rounded;
+  }
+  ::selection {
+    background: rgba(255, 106, 0, 0.3);
+  }
+}
+
+/* Subtle scrollbars in the dark theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #34373f transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2a2d34;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }

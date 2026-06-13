@@ -1,4 +1,5 @@
 import { getAutonomy, getInsights } from "@/lib/worker";
+import { PageHeader } from "@/components/ui";
 import InsightsClient from "./InsightsClient";
 
 export const dynamic = "force-dynamic";
@@ -9,21 +10,17 @@ export default async function InsightsPage() {
     getAutonomy(),
   ]);
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Insights & Strategy</h1>
-        <p className="text-neutral-500 text-sm">
-          What the system has learned from published performance, the Growth Strategist&apos;s
-          recommendations, and the autonomy dial (manual → auto-with-veto → full-auto, gated by
-          earned trust).
-        </p>
-      </div>
+    <>
+      <PageHeader
+        title="Insights & Strategy"
+        subtitle="What the system learned from published performance, the Growth Strategist’s recommendations, and the autonomy dial (manual → auto-with-veto → full-auto, gated by earned trust)."
+      />
       <InsightsClient
         insights={insights}
         recommendations={recommendations}
         gates={gates}
         guardrails={guardrails}
       />
-    </div>
+    </>
   );
 }

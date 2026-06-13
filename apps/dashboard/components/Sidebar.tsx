@@ -2,45 +2,85 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard, Search, FileText, Clapperboard, Upload,
+  PlaySquare, Brain, Settings, type LucideIcon,
+} from "lucide-react";
+import { cn } from "./ui";
 
-const NAV: { href: string; label: string; icon: string }[] = [
-  { href: "/", label: "Command Center", icon: "◎" },
-  { href: "/research", label: "Research", icon: "🔍" },
-  { href: "/scripts", label: "Scripts", icon: "✍" },
-  { href: "/studio", label: "Studio", icon: "🎬" },
-  { href: "/publish", label: "Publish", icon: "📤" },
-  { href: "/videos", label: "Published", icon: "▶" },
-  { href: "/insights", label: "Insights", icon: "🧠" },
-  { href: "/system", label: "System", icon: "⚙" },
+type Item = { href: string; label: string; icon: LucideIcon };
+const GROUPS: { title: string; items: Item[] }[] = [
+  {
+    title: "Pipeline",
+    items: [
+      { href: "/", label: "Command Center", icon: LayoutDashboard },
+      { href: "/research", label: "Research", icon: Search },
+      { href: "/scripts", label: "Scripts", icon: FileText },
+      { href: "/studio", label: "Studio", icon: Clapperboard },
+      { href: "/publish", label: "Publish", icon: Upload },
+      { href: "/videos", label: "Published", icon: PlaySquare },
+    ],
+  },
+  {
+    title: "Intelligence",
+    items: [{ href: "/insights", label: "Insights", icon: Brain }],
+  },
+  {
+    title: "Ops",
+    items: [{ href: "/system", label: "System", icon: Settings }],
+  },
 ];
 
 export default function Sidebar() {
   const path = usePathname();
   return (
-    <aside className="w-56 shrink-0 border-r border-neutral-800 bg-neutral-950 min-h-screen p-4">
-      <div className="px-2 pb-5">
-        <div className="text-brand-orange font-bold leading-tight">PhoneWala</div>
-        <div className="text-neutral-500 text-sm leading-tight">Gyan · Control</div>
+    <aside className="w-60 shrink-0 border-r border-line bg-surface/60 backdrop-blur min-h-dvh sticky top-0 flex flex-col">
+      <div className="flex items-center gap-2.5 px-5 h-16 border-b border-line">
+        <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand-orange text-black font-bold text-sm">P</div>
+        <div className="leading-tight">
+          <div className="text-sm font-semibold text-fg">PhoneWala Gyan</div>
+          <div className="text-[11px] text-fg-subtle">Content Control</div>
+        </div>
       </div>
-      <nav className="space-y-1">
-        {NAV.map((n) => {
-          const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
-          return (
-            <Link
-              key={n.href}
-              href={n.href}
-              className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
-                active
-                  ? "bg-brand-orange/15 text-brand-orange font-medium"
-                  : "text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200"
-              }`}
-            >
-              <span className="w-4 text-center">{n.icon}</span>
-              {n.label}
-            </Link>
-          );
-        })}
+
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+        {GROUPS.map((g) => (
+          <div key={g.title}>
+            <div className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-fg-subtle">
+              {g.title}
+            </div>
+            <div className="space-y-0.5">
+              {g.items.map((n) => {
+                const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
+                const Icon = n.icon;
+                return (
+                  <Link
+                    key={n.href}
+                    href={n.href}
+                    className={cn(
+                      "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                      active
+                        ? "bg-brand-orange/12 text-brand-orange font-medium"
+                        : "text-fg-muted hover:bg-surface-2 hover:text-fg",
+                    )}
+                  >
+                    {active && <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-brand-orange" />}
+                    <Icon className={cn("h-4 w-4", active ? "text-brand-orange" : "text-fg-subtle group-hover:text-fg")} />
+                    {n.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
+
+      <div className="border-t border-line px-5 py-3">
+        <div className="flex items-center gap-2 text-xs text-fg-muted">
+          <span className="inline-block h-2 w-2 rounded-full bg-ok animate-pulsedot" />
+          <span>free tier · live</span>
+        </div>
+      </div>
     </aside>
   );
 }

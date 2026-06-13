@@ -13,12 +13,12 @@ function Card({ item, base }: { item: StudioItem; base: string }) {
   const thumbs = item.thumbnails ?? [];
 
   return (
-    <div className="rounded-lg border border-neutral-800 p-4 space-y-3">
+    <div className="rounded-lg border border-line p-4 space-y-3">
       <div className="flex items-center gap-3">
         <div className="flex-1 min-w-0">
           <div className="truncate font-medium">{item.working_title}</div>
-          <div className="text-xs text-neutral-500">
-            <span className="text-neutral-400">{item.status}</span> · {item.format}
+          <div className="text-xs text-fg-muted">
+            <span className="text-fg-muted">{item.status}</span> · {item.format}
             {item.video_duration ? ` · ${Math.round(item.video_duration)}s video` : ""}
           </div>
         </div>
@@ -27,15 +27,15 @@ function Card({ item, base }: { item: StudioItem; base: string }) {
       <div className="grid gap-4 md:grid-cols-2">
         {/* Final video preview */}
         <div className="space-y-2">
-          <div className="text-xs uppercase text-neutral-500">Final video</div>
+          <div className="text-xs uppercase text-fg-muted">Final video</div>
           {video ? (
-            <video src={video} controls className="w-full rounded border border-neutral-800" />
+            <video src={video} controls className="w-full rounded border border-line" />
           ) : (
-            <div className="text-sm text-neutral-600">not rendered yet</div>
+            <div className="text-sm text-fg-subtle">not rendered yet</div>
           )}
           {voice && (
             <>
-              <div className="text-xs uppercase text-neutral-500 pt-1">Voiceover</div>
+              <div className="text-xs uppercase text-fg-muted pt-1">Voiceover</div>
               <audio src={voice} controls className="w-full" />
             </>
           )}
@@ -43,7 +43,7 @@ function Card({ item, base }: { item: StudioItem; base: string }) {
 
         {/* Thumbnails */}
         <div className="space-y-2">
-          <div className="text-xs uppercase text-neutral-500">Thumbnails (A/B/C)</div>
+          <div className="text-xs uppercase text-fg-muted">Thumbnails (A/B/C)</div>
           {thumbs.length ? (
             <div className="grid grid-cols-3 gap-2">
               {thumbs.map((t) => {
@@ -54,10 +54,10 @@ function Card({ item, base }: { item: StudioItem; base: string }) {
                       <img
                         src={src}
                         alt={`variant ${t.variant}`}
-                        className={`w-full rounded border ${t.selected ? "border-brand-orange" : "border-neutral-800"}`}
+                        className={`w-full rounded border ${t.selected ? "border-brand-orange" : "border-line"}`}
                       />
                     )}
-                    <div className="text-[10px] text-neutral-500">
+                    <div className="text-[10px] text-fg-muted">
                       {t.variant}{t.selected ? " ★" : ""}
                     </div>
                   </div>
@@ -65,7 +65,7 @@ function Card({ item, base }: { item: StudioItem; base: string }) {
               })}
             </div>
           ) : (
-            <div className="text-sm text-neutral-600">not designed yet</div>
+            <div className="text-sm text-fg-subtle">not designed yet</div>
           )}
         </div>
       </div>
@@ -73,14 +73,14 @@ function Card({ item, base }: { item: StudioItem; base: string }) {
       {/* Scene timeline */}
       {scenes.length > 0 && (
         <div>
-          <div className="text-xs uppercase text-neutral-500 mb-1">
+          <div className="text-xs uppercase text-fg-muted mb-1">
             Scene plan ({scenes.length})
           </div>
           <div className="flex flex-wrap gap-1">
             {scenes.map((s) => (
               <span
                 key={s.idx}
-                className="rounded bg-neutral-900 border border-neutral-800 px-2 py-0.5 text-[11px] text-neutral-400"
+                className="rounded bg-surface-2 border border-line px-2 py-0.5 text-[11px] text-fg-muted"
                 title={s.caption}
               >
                 {s.idx}. {s.template} · {Math.round(s.duration)}s
@@ -102,9 +102,9 @@ export default function StudioClient({
 }) {
   if (items.length === 0) {
     return (
-      <p className="text-neutral-500">
+      <p className="text-fg-muted">
         Nothing in production yet. Approve a script in the Scripts tab, then run the production
-        pipeline (<code className="text-neutral-400">POST /jobs/production_pipeline</code>).
+        pipeline (<code className="text-fg-muted">POST /jobs/production_pipeline</code>).
       </p>
     );
   }
