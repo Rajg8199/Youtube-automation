@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     media_dir: str = "media"  # where rendered audio/video/thumbnails are written + served
     tts_voice: str = "hi-IN-MadhurNeural"  # free Edge TTS Hindi voice
     tts_voice_female: str = "hi-IN-SwaraNeural"
+    pexels_api_key: str = ""  # free stock b-roll backgrounds (graceful fallback if unset)
 
     # ---- Phase 4: publish + analytics ----
     youtube_client_id: str = ""

@@ -24,6 +24,9 @@ export default function Home() {
         <Link href="/videos" className="text-brand-orange underline">
           → Published
         </Link>
+        <Link href="/insights" className="text-brand-orange underline">
+          → Insights & Strategy
+        </Link>
         <Link href="/system" className="text-brand-orange underline">
           → System health
         </Link>

@@ -103,3 +103,10 @@ demo-phase-4: db-reset ## Acceptance: finished video -> SEO + approved -> manual
 		DATABASE_URL=postgresql://$(DB_USER):postgres@localhost:$${DB_PORT:-54322}/$(DB_NAME) \
 		MEDIA_DIR=media \
 		uv run python -m app.demo_phase4
+
+.PHONY: demo-phase-5
+demo-phase-5: db-reset ## Acceptance: learning reranks + weekly report + 9:16 short (in-container)
+	@echo ">> Phase 5 demo (runs in the worker container: ffmpeg for shorts)"
+	$(COMPOSE) up -d --build worker
+	@until $(COMPOSE) exec -T worker python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)" >/dev/null 2>&1; do sleep 2; done
+	$(COMPOSE) exec -T worker python -m app.demo_phase5

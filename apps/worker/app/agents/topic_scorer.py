@@ -89,7 +89,10 @@ def _score_one(ctx: AgentContext, topic: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_topic_scorer(ctx: AgentContext, *, limit: int = 200) -> dict[str, int]:
+    from ..intelligence.learning import category_priors
+
     scored = errors = 0
+    priors = category_priors()  # learned per-category performance (empty until videos publish)
     with cursor() as cur:
         topics = _fetch_new_topics(cur, limit)
 
@@ -105,6 +108,8 @@ def run_topic_scorer(ctx: AgentContext, *, limit: int = 200) -> dict[str, int]:
                     channel_fit=fit,
                     monetization_potential=float(j["monetization_potential"]),
                     freshness=float(j["freshness"]),
+                    # Learning loop: learned category performance (0.5 neutral until we have data).
+                    predicted_views_score=priors.get(topic["category"], 0.5),
                 )
                 comp = composite(fs, DEFAULT_WEIGHTS)
                 d = fs.as_dict()

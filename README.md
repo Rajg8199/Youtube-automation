@@ -17,8 +17,13 @@ dial").
 > - **Phase 4 (Publish + Analytics):** YouTube OAuth helper (`make youtube-auth`), deterministic
 >   SEO + affiliate links, quota ledger, Publisher (API upload or manual publish-kit), Analytics
 >   ingest, and the `/publish` + `/videos` dashboard.
+> - **Phase 5 (Intelligence):** learning loop (published performance → per-category priors that
+>   re-rank the Topic Scorer), Growth Strategist weekly report + recommendations, shorts
+>   derivation (9:16), and the autonomy dial (manual → auto-with-veto → full-auto, guardrail-gated)
+>   on `/insights`.
 >
-> Phase 5 (learning loop, Growth Strategist, shorts, autonomy dial) is scaffolded, not built.
+> All 6 phases pass their acceptance demos. Production now also renders **Pexels b-roll**
+> backgrounds behind captions when `PEXELS_API_KEY` is set (gradient fallback otherwise).
 
 ## Quickstart
 ```bash
@@ -40,6 +45,7 @@ Operations: [docs/runbook.md](docs/runbook.md). Script voice: [docs/voice-guide.
 | `make demo-phase-2` | Phase 2 acceptance: greenlit topic → QA-passed Hinglish script (mock LLM) |
 | `make demo-phase-3` | Phase 3 acceptance: approved script → 1080p video + thumbnails + subtitles (in-container) |
 | `make demo-phase-4` | Phase 4 acceptance: finished video → SEO + manual publish-kit |
+| `make demo-phase-5` | Phase 5 acceptance: learning reranks + weekly report + 9:16 short (in-container) |
 | `make youtube-auth` | One-time: browser OAuth → writes `YOUTUBE_REFRESH_TOKEN` to `.env` |
 | `make up` / `make down` | start / stop db + worker |
 | `make db-reset` | drop public schema, re-apply all migrations in order |

@@ -185,3 +185,52 @@ export async function getVideos(limit = 50): Promise<PublishedVideo[]> {
   if (!res.ok) return [];
   return (await res.json()).videos ?? [];
 }
+
+export interface Insight {
+  id: string;
+  scope: string;
+  insight: string;
+  confidence: number | null;
+  applied: boolean;
+}
+export interface Recommendation {
+  id: string;
+  type: string;
+  title: string;
+  detail: string | null;
+  status: string;
+}
+export interface AutonomyGate {
+  gate: string;
+  mode: string;
+  updated_at: string;
+}
+export interface Guardrails {
+  published: number;
+  qa_pass_rate: number;
+  policy_flags_30d: number;
+  full_auto_eligible: boolean;
+  thresholds: { min_published: number; min_qa_pass_rate: number };
+}
+
+export async function getInsights(): Promise<{ insights: Insight[]; recommendations: Recommendation[] }> {
+  const res = await fetch(`${WORKER_URL}/insights`, { cache: "no-store" });
+  if (!res.ok) return { insights: [], recommendations: [] };
+  const j = await res.json();
+  return { insights: j.insights ?? [], recommendations: j.recommendations ?? [] };
+}
+
+export async function getAutonomy(): Promise<{ gates: AutonomyGate[]; guardrails: Guardrails | null }> {
+  const res = await fetch(`${WORKER_URL}/autonomy`, { cache: "no-store" });
+  if (!res.ok) return { gates: [], guardrails: null };
+  const j = await res.json();
+  return { gates: j.gates ?? [], guardrails: j.guardrails ?? null };
+}
+
+export async function setAutonomy(gate: string, mode: string): Promise<Response> {
+  return fetch(`${WORKER_URL}/autonomy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ gate, mode }),
+  });
+}

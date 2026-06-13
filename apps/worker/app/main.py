@@ -37,6 +37,10 @@ from .production.render_worker import run_render_worker
 from .production.thumbnail_designer import run_thumbnail_designer
 from .production.visual_director import run_visual_director
 from .production.voice_producer import run_voice_producer
+from .intelligence import autonomy
+from .intelligence.learning import run_learning
+from .intelligence.shorts import run_shorts_derivation
+from .intelligence.strategist import run_growth_strategist
 from .publishing import quota
 from .publishing.analytics import run_analytics_analyst
 from .publishing.publisher import run_publisher
@@ -97,6 +101,10 @@ JOBS: dict[str, Callable[[int], dict[str, Any]]] = {
     "seo_optimizer": lambda limit: run_seo_optimizer(limit=limit),
     "publisher": lambda limit: run_publisher(limit=limit),
     "analytics_analyst": lambda limit: run_analytics_analyst(limit=limit),
+    # Phase 5 — intelligence
+    "learning": lambda limit: run_learning(limit=limit),
+    "growth_strategist": lambda limit: run_growth_strategist(limit=limit),
+    "shorts_derive": lambda limit: run_shorts_derivation(limit=limit),
 }
 
 
@@ -455,3 +463,40 @@ def videos(limit: int = 50) -> dict[str, Any]:
             (limit,),
         )
         return {"videos": cur.fetchall()}
+
+
+# ---- Phase 5: intelligence + autonomy ----
+
+
+@app.get("/insights")
+def insights(limit: int = 50) -> dict[str, Any]:
+    with cursor() as cur:
+        cur.execute(
+            "select id, scope, ref_id, insight, confidence, applied, created_at "
+            "from insights order by created_at desc limit %s",
+            (limit,),
+        )
+        ins = cur.fetchall()
+        cur.execute(
+            "select id, type, title, detail, expected_impact, status, created_at "
+            "from recommendations order by created_at desc limit %s",
+            (limit,),
+        )
+        recs = cur.fetchall()
+    return {"insights": ins, "recommendations": recs}
+
+
+@app.get("/autonomy")
+def autonomy_get() -> dict[str, Any]:
+    return {"gates": autonomy.get_autonomy(), "guardrails": autonomy.guardrail_status()}
+
+
+@app.post("/autonomy")
+def autonomy_set(gate: str = Body(..., embed=True), mode: str = Body(..., embed=True)) -> dict[str, Any]:
+    try:
+        row = autonomy.set_autonomy(gate, mode)
+    except PermissionError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"gate": row["gate"], "mode": row["mode"]}

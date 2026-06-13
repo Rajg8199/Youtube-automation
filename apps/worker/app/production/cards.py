@@ -112,12 +112,34 @@ def _gradient(w: int, h: int):
     return base
 
 
+def _photo_bg(path: str, w: int, h: int):
+    """Cover-fit a photo to WxH and darken it so caption text stays readable."""
+    from PIL import Image
+
+    img = Image.open(path).convert("RGB")
+    scale = max(w / img.width, h / img.height)
+    img = img.resize((max(w, int(img.width * scale)), max(h, int(img.height * scale))))
+    left, top = (img.width - w) // 2, (img.height - h) // 2
+    img = img.crop((left, top, left + w, top + h))
+    return Image.blend(img, Image.new("RGB", (w, h), (0, 0, 0)), 0.64)
+
+
+def _background(w: int, h: int, bg_image: str | None):
+    if bg_image:
+        try:
+            return _photo_bg(bg_image, w, h)
+        except Exception:  # noqa: BLE001 - bad/missing image -> gradient
+            pass
+    return _gradient(w, h)
+
+
 def render_segment_card(
-    path: str, *, title: str, template: str, text: str, index: int, total: int
+    path: str, *, title: str, template: str, text: str, index: int, total: int,
+    bg_image: str | None = None,
 ) -> None:
     from PIL import ImageDraw
 
-    img = _gradient(VIDEO_W, VIDEO_H)
+    img = _background(VIDEO_W, VIDEO_H, bg_image)
     d = ImageDraw.Draw(img)
     d.rectangle([0, 0, 14, VIDEO_H], fill=ORANGE)
 

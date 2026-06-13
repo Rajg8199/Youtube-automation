@@ -15,6 +15,7 @@ from typing import Any
 from ..db import cursor
 from ..events import log_system_event
 from ..state_machine import transition
+from .broll import fetch_broll, queries_for
 from .cards import render_segment_card
 from .media import item_dir, media_dir, probe_duration, rel_path, run_ffmpeg, store_media_asset
 
@@ -26,9 +27,11 @@ def _fetch(cur, limit: int) -> list[dict[str, Any]]:
     cur.execute(
         """
         select ci.id as content_item_id, ci.working_title,
+               t.devices, t.brands,
                sp.scenes,
                m.storage_path as vo_path, m.duration_sec as vo_duration, m.meta as vo_meta
         from content_items ci
+        left join topics t on t.id = ci.topic_id
         join lateral (
             select scenes from scene_plans p where p.content_item_id = ci.id
             order by created_at desc limit 1
@@ -103,15 +106,19 @@ def _render_one(item: dict[str, Any]) -> dict[str, Any]:
         segments = [{"text": sc.get("text", sc.get("caption", "")),
                      "start": 0, "end": float(sc.get("duration", 4))} for sc in scenes]
 
+    # Optional Pexels b-roll pool (empty list if no PEXELS_API_KEY -> gradient fallback).
+    broll = fetch_broll(queries_for(item.get("devices") or [], item.get("brands") or []), out)
+
     clips, list_lines = [], []
     total = len(segments)
     for i, seg in enumerate(segments):
         dur = max(1.6, float(seg.get("end", 0)) - float(seg.get("start", 0))) or 3.0
         mid = (float(seg.get("start", 0)) + float(seg.get("end", dur))) / 2
         template = _scene_template_at(scenes, mid)
+        bg = broll[i % len(broll)] if broll else None
         png = os.path.join(out, f"cap_{i:03d}.png")
         render_segment_card(png, title=item["working_title"], template=template,
-                            text=seg.get("text", ""), index=i, total=total)
+                            text=seg.get("text", ""), index=i, total=total, bg_image=bg)
         clip = os.path.join(out, f"clip_{i:03d}.mp4")
         _kenburns_clip(png, clip, dur, zoom_in=(i % 2 == 0))
         clips.append(clip)
