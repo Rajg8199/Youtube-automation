@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import sys
+import uuid
 
 from .db import close_pool, cursor
 from .production.pipeline import run_production_pipeline
@@ -57,7 +58,8 @@ def _seed() -> str:
         cur.execute(
             "insert into topics (title, slug, category, devices, brands, summary, status) "
             "values (%s, %s, 'buying_guide', '{}', '{}', %s, 'converted') returning id",
-            (WORKING_TITLE, "buying-guide-7-tips-2026", "Evergreen phone buying checklist for India."),
+            (WORKING_TITLE, f"buying-guide-7-tips-{uuid.uuid4().hex[:8]}",
+             "Evergreen phone buying checklist for India."),
         )
         topic_id = cur.fetchone()["id"]
         cur.execute(

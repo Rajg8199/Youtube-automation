@@ -173,6 +173,55 @@ def render_segment_card(
     img.save(path)
 
 
+def render_caption_overlay(
+    path: str, *, w: int, h: int, title: str, template: str, text: str, index: int, total: int
+) -> None:
+    """Transparent RGBA overlay (chrome + caption + scrims) to composite over a video clip.
+    Works for landscape (1920x1080) and vertical (1080x1920)."""
+    from PIL import Image, ImageDraw
+
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    pad = int(w * 0.05)
+
+    # Top + bottom scrims for legibility over moving video.
+    d.rectangle([0, 0, w, int(h * 0.16)], fill=(8, 8, 10, 180))
+    d.rectangle([0, int(h * 0.84), w, h], fill=(8, 8, 10, 160))
+    d.rectangle([0, 0, 12, h], fill=(*ORANGE, 255))
+
+    _draw_mixed(d, pad, int(h * 0.045), "PhoneWala Gyan", int(w * 0.022), (*ORANGE, 255))
+    chip = _TEMPLATE_LABEL.get(template, "POINT")
+    cs = int(w * 0.018)
+    cw = _measure(d, chip, cs)
+    d.rounded_rectangle([w - pad - cw - 28, int(h * 0.04), w - pad, int(h * 0.04) + cs + 18],
+                        radius=10, fill=(40, 28, 14, 230), outline=(*ORANGE, 255), width=2)
+    _draw_mixed(d, w - pad - cw - 14, int(h * 0.045), chip, cs, (*ORANGE, 255))
+    for line in _wrap_mixed(d, title, int(w * 0.022), w - 2 * pad)[:1]:
+        _draw_mixed(d, pad, int(h * 0.092), line, int(w * 0.022), (210, 210, 214, 255))
+
+    # Center caption with a translucent panel behind it.
+    size = int(w * (0.052 if len(text) < 90 else 0.044))
+    lines = _wrap_mixed(d, text, size, int(w * 0.86))[:7]
+    line_h = size + int(size * 0.32)
+    block_h = len(lines) * line_h
+    top = (h - block_h) // 2
+    d.rounded_rectangle([pad - 10, top - 24, w - pad + 10, top + block_h + 14],
+                        radius=18, fill=(8, 8, 12, 150))
+    y = top
+    for line in lines:
+        lw = _measure(d, line, size)
+        _draw_mixed(d, (w - lw) / 2, y, line, size, (245, 245, 245, 255))
+        y += line_h
+
+    # Progress bar.
+    by = int(h * 0.9)
+    d.rectangle([pad, by, w - pad, by + 8], fill=(60, 60, 66, 200))
+    frac = (index + 1) / max(1, total)
+    d.rectangle([pad, by, pad + int((w - 2 * pad) * frac), by + 8], fill=(*ORANGE, 255))
+    img.save(path)
+
+
+
 def render_thumbnail(path: str, *, title: str, variant: str) -> None:
     from PIL import ImageDraw
 
