@@ -85,9 +85,21 @@ demo-phase-2: db-reset ## Acceptance: greenlit topic -> QA-passed Hinglish scrip
 		USE_MOCK_PROVIDERS=true EMBEDDINGS_BACKEND=mock \
 		uv run python -m app.demo_phase2
 
+.PHONY: youtube-auth
+youtube-auth: ## One-time: open browser, authorize YouTube, write refresh token to .env
+	@cd apps/worker && uv run --extra youtube python -m app.youtube_auth
+
 .PHONY: demo-phase-3
 demo-phase-3: db-reset ## Acceptance: approved script -> 1080p video + 3 thumbnails + subtitles (in-container; real Edge TTS)
 	@echo ">> Phase 3 demo (runs in the worker container: ffmpeg + Edge TTS)"
 	$(COMPOSE) up -d --build worker
 	@until $(COMPOSE) exec -T worker python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)" >/dev/null 2>&1; do sleep 2; done
 	$(COMPOSE) exec -T worker python -m app.demo_phase3
+
+.PHONY: demo-phase-4
+demo-phase-4: db-reset ## Acceptance: finished video -> SEO + approved -> manual publish-kit
+	@echo ">> Phase 4 demo (manual-kit path, no Google API)"
+	@cd apps/worker && \
+		DATABASE_URL=postgresql://$(DB_USER):postgres@localhost:$${DB_PORT:-54322}/$(DB_NAME) \
+		MEDIA_DIR=media \
+		uv run python -m app.demo_phase4

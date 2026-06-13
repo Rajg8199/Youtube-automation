@@ -14,8 +14,11 @@ dial").
 >   hard-gate (+revise loop), Python state machine, and the `/scripts` dashboard + script gate.
 > - **Phase 3 (Production):** Voice Producer (Edge TTS), deterministic Visual Director, Pillow
 >   scene cards + FFmpeg render → 1080p MP4 + subtitles, Thumbnail Designer, and `/studio`.
+> - **Phase 4 (Publish + Analytics):** YouTube OAuth helper (`make youtube-auth`), deterministic
+>   SEO + affiliate links, quota ledger, Publisher (API upload or manual publish-kit), Analytics
+>   ingest, and the `/publish` + `/videos` dashboard.
 >
-> Phases 4–5 (publishing + analytics, learning loop) are scaffolded, not built.
+> Phase 5 (learning loop, Growth Strategist, shorts, autonomy dial) is scaffolded, not built.
 
 ## Quickstart
 ```bash
@@ -36,6 +39,8 @@ Operations: [docs/runbook.md](docs/runbook.md). Script voice: [docs/voice-guide.
 | `make demo-phase-1` | Phase 1 acceptance: research → ≥30 deduped scored topics (mock providers) |
 | `make demo-phase-2` | Phase 2 acceptance: greenlit topic → QA-passed Hinglish script (mock LLM) |
 | `make demo-phase-3` | Phase 3 acceptance: approved script → 1080p video + thumbnails + subtitles (in-container) |
+| `make demo-phase-4` | Phase 4 acceptance: finished video → SEO + manual publish-kit |
+| `make youtube-auth` | One-time: browser OAuth → writes `YOUTUBE_REFRESH_TOKEN` to `.env` |
 | `make up` / `make down` | start / stop db + worker |
 | `make db-reset` | drop public schema, re-apply all migrations in order |
 | `make db-verify` | assert tables, HNSW indexes, seed data |

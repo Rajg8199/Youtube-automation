@@ -29,6 +29,12 @@ media = [
     "edge-tts>=7.0.0",
     "pillow>=11.0.0",
 ]
+# Phase 4 publish + analytics: YouTube Data + Analytics APIs + OAuth.
+youtube = [
+    "google-api-python-client>=2.140.0",
+    "google-auth-oauthlib>=1.2.0",
+    "google-auth-httplib2>=0.2.0",
+]
 
 [dependency-groups]
 dev = [

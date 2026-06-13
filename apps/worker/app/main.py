@@ -37,6 +37,10 @@ from .production.render_worker import run_render_worker
 from .production.thumbnail_designer import run_thumbnail_designer
 from .production.visual_director import run_visual_director
 from .production.voice_producer import run_voice_producer
+from .publishing import quota
+from .publishing.analytics import run_analytics_analyst
+from .publishing.publisher import run_publisher
+from .publishing.seo import run_seo_optimizer
 from .services.research_poll import run_research_sweep
 from .state_machine import transition
 
@@ -89,6 +93,10 @@ JOBS: dict[str, Callable[[int], dict[str, Any]]] = {
     "thumbnail_designer": lambda limit: run_thumbnail_designer(limit=limit),
     "finalize": lambda limit: run_finalize(limit=limit),
     "production_pipeline": lambda limit: run_production_pipeline(limit=limit),
+    # Phase 4 — publish + analytics
+    "seo_optimizer": lambda limit: run_seo_optimizer(limit=limit),
+    "publisher": lambda limit: run_publisher(limit=limit),
+    "analytics_analyst": lambda limit: run_analytics_analyst(limit=limit),
 }
 
 
@@ -342,3 +350,108 @@ def studio(limit: int = 50) -> dict[str, Any]:
             (list(_STUDIO_STAGE), limit),
         )
         return {"studio": cur.fetchall()}
+
+
+# ---- Phase 4: publish + analytics ----
+
+_PUBLISH_STAGE = ("ready_for_review", "approved", "scheduled", "publishing", "published")
+
+
+@app.get("/publish")
+def publish_queue(limit: int = 50) -> dict[str, Any]:
+    settings = get_settings()
+    with cursor() as cur:
+        cur.execute(
+            """
+            select ci.id, ci.working_title, ci.status, ci.priority,
+                   se.title, cardinality(se.tags) as tag_count,
+                   (select storage_path from media_assets where content_item_id = ci.id
+                      and kind = 'final_video' order by created_at desc limit 1) as video_path,
+                   pj.method, pj.status as publish_status, pj.youtube_video_id, pj.error as publish_note,
+                   (select status from approvals a where a.content_item_id = ci.id and a.gate = 'publish'
+                      order by created_at desc limit 1) as approval_status
+            from content_items ci
+            left join lateral (
+                select title, tags from seo_metadata where content_item_id = ci.id
+                order by created_at desc limit 1
+            ) se on true
+            left join lateral (
+                select method, status, youtube_video_id, error from publish_jobs
+                where content_item_id = ci.id order by id desc limit 1
+            ) pj on true
+            where ci.status = any(%s)
+            order by ci.priority desc, ci.created_at asc
+            limit %s
+            """,
+            (list(_PUBLISH_STAGE), limit),
+        )
+        rows = cur.fetchall()
+    for r in rows:
+        r["kit_path"] = f"{r['id']}/publish_kit.zip" if r.get("method") == "manual_kit" else None
+    return {
+        "quota": {
+            "used": quota.units_used_today(),
+            "remaining": quota.remaining(),
+            "daily": settings.youtube_daily_quota,
+            "youtube_ready": settings.youtube_ready,
+        },
+        "items": rows,
+    }
+
+
+@app.post("/content/{content_id}/publish-decision")
+def publish_decision(content_id: str, action: str = Body(..., embed=True),
+                     note: str | None = Body(None, embed=True)) -> dict[str, Any]:
+    if action not in ("approve", "reject"):
+        raise HTTPException(status_code=400, detail="action must be approve|reject")
+    with cursor() as cur:
+        cur.execute("select status from content_items where id = %s", (content_id,))
+        row = cur.fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="content item not found")
+    if row["status"] != "ready_for_review":
+        raise HTTPException(status_code=409, detail="only a ready_for_review item can be decided")
+
+    if action == "approve":
+        transition(content_item_id=content_id, to_status="approved", actor="human:rj",
+                   detail={"gate": "publish"})
+        with cursor() as cur:
+            cur.execute(
+                "insert into approvals (content_item_id, gate, status, reviewer_note, decided_at) "
+                "values (%s, 'publish', 'approved', %s, now())",
+                (content_id, note),
+            )
+        return {"id": content_id, "status": "approved", "approval": "approved"}
+
+    transition(content_item_id=content_id, to_status="rejected", actor="human:rj",
+               detail={"gate": "publish", "note": note})
+    with cursor() as cur:
+        cur.execute(
+            "insert into approvals (content_item_id, gate, status, reviewer_note, decided_at) "
+            "values (%s, 'publish', 'rejected', %s, now())",
+            (content_id, note),
+        )
+    return {"id": content_id, "status": "rejected", "approval": "rejected"}
+
+
+@app.get("/videos")
+def videos(limit: int = 50) -> dict[str, Any]:
+    with cursor() as cur:
+        cur.execute(
+            """
+            select yv.youtube_video_id, yv.published_at, yv.format,
+                   ci.working_title,
+                   m.views, m.watch_time_min, m.avg_pct_viewed::float8 as avg_pct_viewed,
+                   m.likes, m.comments, m.date as metrics_date
+            from youtube_videos yv
+            left join content_items ci on ci.id = yv.content_item_id
+            left join lateral (
+                select * from video_metrics_daily d where d.youtube_video_id = yv.youtube_video_id
+                order by date desc limit 1
+            ) m on true
+            order by yv.published_at desc nulls last
+            limit %s
+            """,
+            (limit,),
+        )
+        return {"videos": cur.fetchall()}

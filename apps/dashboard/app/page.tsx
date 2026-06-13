@@ -18,6 +18,12 @@ export default function Home() {
         <Link href="/studio" className="text-brand-orange underline">
           → Studio
         </Link>
+        <Link href="/publish" className="text-brand-orange underline">
+          → Publish Queue
+        </Link>
+        <Link href="/videos" className="text-brand-orange underline">
+          → Published
+        </Link>
         <Link href="/system" className="text-brand-orange underline">
           → System health
         </Link>

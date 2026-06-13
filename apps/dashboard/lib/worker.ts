@@ -130,3 +130,58 @@ export async function getStudioItems(limit = 50): Promise<StudioItem[]> {
   if (!res.ok) return [];
   return (await res.json()).studio ?? [];
 }
+
+export interface PublishQuota {
+  used: number;
+  remaining: number;
+  daily: number;
+  youtube_ready: boolean;
+}
+export interface PublishItem {
+  id: string;
+  working_title: string;
+  status: string;
+  title: string | null;
+  tag_count: number | null;
+  video_path: string | null;
+  method: string | null;
+  publish_status: string | null;
+  youtube_video_id: string | null;
+  publish_note: string | null;
+  approval_status: string | null;
+  kit_path: string | null;
+}
+
+export async function getPublishQueue(): Promise<{ quota: PublishQuota | null; items: PublishItem[] }> {
+  const res = await fetch(`${WORKER_URL}/publish`, { cache: "no-store" });
+  if (!res.ok) return { quota: null, items: [] };
+  const j = await res.json();
+  return { quota: j.quota ?? null, items: j.items ?? [] };
+}
+
+export async function decidePublish(id: string, action: "approve" | "reject"): Promise<Response> {
+  return fetch(`${WORKER_URL}/content/${id}/publish-decision`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action }),
+  });
+}
+
+export interface PublishedVideo {
+  youtube_video_id: string;
+  published_at: string | null;
+  format: string | null;
+  working_title: string | null;
+  views: number | null;
+  watch_time_min: number | null;
+  avg_pct_viewed: number | null;
+  likes: number | null;
+  comments: number | null;
+  metrics_date: string | null;
+}
+
+export async function getVideos(limit = 50): Promise<PublishedVideo[]> {
+  const res = await fetch(`${WORKER_URL}/videos?limit=${limit}`, { cache: "no-store" });
+  if (!res.ok) return [];
+  return (await res.json()).videos ?? [];
+}

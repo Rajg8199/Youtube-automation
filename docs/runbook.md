@@ -32,6 +32,22 @@ Tradeoffs and the Claude-for-scripts hybrid are in `docs/decisions.md` ADR-0008.
 With mock LLM, `trend_scout` still creates topics but `topic_scorer` needs a real key (the
 mock returns no factor scores) — use `make demo-phase-1` for the deterministic full-path proof.
 
+## Phase 4 — publish (YouTube)
+Get a refresh token (one-time, interactive — needs your browser + a Google login):
+```bash
+make youtube-auth     # opens consent, writes YOUTUBE_REFRESH_TOKEN into .env
+docker compose -f infra/docker-compose.yml up -d worker   # restart to pick it up
+```
+The OAuth client must allow the loopback redirect `http://localhost:8765/` — a Google Cloud
+"Desktop app" client does by default; a "Web application" client needs that redirect URI added.
+If consent returns no refresh token, revoke prior access at myaccount.google.com/permissions
+and retry (the helper forces `prompt=consent`).
+
+**Without a token** the Publisher builds a downloadable publish-kit (video + thumbnail +
+metadata) on `/publish` — upload it by hand. **With a token**, uploads go via the API but an
+unverified app forces `privacy=private` until Google audits it. Quota: `videos.insert` = 1600
+units of a 10,000/day budget; the ledger blocks over-budget uploads and falls back to a kit.
+
 ### Known limitation — Reddit sources 403
 Reddit blocks the generic bot User-Agent on `*/new.json` (returns 403); the 3 Reddit
 sources fail gracefully (logged as `warn` in `system_events`) while the 6 RSS sources work.

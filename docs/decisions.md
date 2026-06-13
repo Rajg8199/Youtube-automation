@@ -129,3 +129,22 @@ enough to watch and validate the pipeline end to end at $0. TTS = free Edge TTS 
 neural). Media is written to a Docker volume and served at `/media`. When richer motion is
 needed, build the 7 Remotion templates and point the renderer interface at them; the rest of
 the pipeline (voice, scene plan, thumbnails, finalize, Studio UI) is unchanged.
+
+---
+
+## ADR-0010 — Phase 4 publishing: OAuth helper + manual publish-kit fallback
+**Status:** Accepted
+**Context:** Real YouTube uploads need (a) a refresh token from an interactive OAuth consent
+(can't be typed in), and (b) for *public* uploads, a Google API audit — until then an
+unverified app's uploads are forced to `private`. The user has the client ID/secret but no
+refresh token.
+**Decision:** Ship `make youtube-auth` (host-run `InstalledAppFlow.run_local_server`,
+`access_type=offline` + `prompt=consent`, scopes upload/force-ssl/yt-analytics) that writes
+`YOUTUBE_REFRESH_TOKEN` into `.env`. The Publisher uploads via the Data API when the token +
+quota allow (privacy defaults to `private`), and **otherwise builds a downloadable
+publish-kit** (video + thumbnail + metadata.txt) — the §2 semi-manual fallback. A quota
+ledger blocks uploads that would exceed 10,000 units/day and falls back to a kit.
+**Consequences:** Zero-friction path today (kit), real API path the moment the token is set.
+SEO is deterministic (no LLM → no Gemini quota). Analytics ingest + the retention→script-
+segment insight are wired but only light up after a real upload + a day of data. `youtube`
+deps are an optional extra, also baked into the worker image.

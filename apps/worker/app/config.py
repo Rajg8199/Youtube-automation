@@ -55,6 +55,19 @@ class Settings(BaseSettings):
     tts_voice: str = "hi-IN-MadhurNeural"  # free Edge TTS Hindi voice
     tts_voice_female: str = "hi-IN-SwaraNeural"
 
+    # ---- Phase 4: publish + analytics ----
+    youtube_client_id: str = ""
+    youtube_client_secret: str = ""
+    youtube_refresh_token: str = ""
+    youtube_privacy: str = "private"  # unverified apps lock uploads to private anyway
+    youtube_daily_quota: int = 10000  # default YouTube Data API units/day
+    amazon_associates_tag: str = ""
+    flipkart_affiliate_id: str = ""
+
+    @property
+    def youtube_ready(self) -> bool:
+        return bool(self.youtube_client_id and self.youtube_client_secret and self.youtube_refresh_token)
+
     @property
     def llm_provider(self) -> Literal["gemini", "anthropic"]:
         """`free` tier → Gemini (free); `budget`/`premium` → Claude."""

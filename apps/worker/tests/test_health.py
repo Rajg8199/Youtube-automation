@@ -33,5 +33,5 @@ def test_unknown_agent_404():
 
 
 def test_known_agent_501():
-    # publisher is a known agent but not implemented until Phase 4.
-    assert client.post("/jobs/publisher").status_code == 501
+    # growth_strategist is a known agent but not implemented until Phase 5.
+    assert client.post("/jobs/growth_strategist").status_code == 501
